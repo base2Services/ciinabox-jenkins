@@ -16,7 +16,7 @@ class JobScriptsSpec extends Specification {
     void 'test script #file.name'(File file) {
         given:
         JobManagement jm = new MemoryJobManagement()
-        new File('resources').eachFileRecurse(FileType.FILES) {
+        new File('jobs').eachFileRecurse(FileType.FILES) {
             jm.availableFiles[it.path.replaceAll('\\\\', '/')] = it.text
         }
 
