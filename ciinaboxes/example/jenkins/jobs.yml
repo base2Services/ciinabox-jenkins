@@ -1,0 +1,52 @@
+ #ciinabox jenkins config
+
+jenkins_url: http://192.168.99.103:8080/
+
+defaults:
+  scripts_dir: ciinaboxes/scripts
+  github:
+    credentials: github
+    org_white_list:
+      - base2Services
+    cron: "* * * * *"
+    merge_comment: merge by jenkins
+    trigger_phrase: ok to merge
+  slack_channel: devops
+
+jobs:
+  -
+    name: Example-Pull-Request
+    folder: example
+    repo: base2Services/ciinabox-ecs
+    shell:
+      - file: example.sh
+  -
+    name: Example-Branch-With-Artifact-Archive
+    folder: example
+    repo: base2Services/ciinabox-ecs
+    branch: master
+    shell:
+      - file: example.sh
+    trigger:
+      -
+        job: example/Example-Branch-With-Copy-Artifact-No-SCM
+        curent_parameters: true
+        block: true
+        parameters:
+          app_build_number: $BUILD_NUMBER
+    archive:
+      - README.md
+    push:
+      - master
+      - production
+  -
+    name: Example-Branch-With-Copy-Artifact-No-SCM
+    folder: example
+    parameters:
+      app_build_number: ""
+    artifacts:
+      -
+        job: example/Example-Branch-With-Artifact-Archive
+        file_pattern: "*.md"
+    shell:
+      - script: "echo ${APP_BUILD_NUMBER} - `date` >> README.md"
