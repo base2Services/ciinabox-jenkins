@@ -44,6 +44,7 @@ class JobHelper {
 
   static void steps(def job, def vars) {
     shellSteps(job, vars)
+    dslSteps(job,vars)
   }
 
   static void shellSteps(def job, def vars) {
@@ -62,6 +63,26 @@ class JobHelper {
         }
         job.steps {
           shell script
+        }
+      }
+    }
+  }
+
+  static void dslSteps(def job, def vars) {
+    def dslStep = vars.get('dsl')
+    if(dslStep != null) {
+      def dslSource = dslStep.get('filter','')
+      def remove = dslStep.get('remove_action','DISABLE')
+      def ignore = dslStep.get('ignore_existing',false)
+      def classpath = dslStep.get('additional_classpath')
+      job.steps {
+        dsl {
+          external(dslSource)
+          ignoreExisting(ignore)
+          removeAction(remove)
+          if(classpath != null) {
+            additionalClasspath(classpath)
+          }
         }
       }
     }
