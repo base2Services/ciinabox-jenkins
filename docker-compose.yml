@@ -5,15 +5,14 @@ jenkins:
   ports:
     - "8080:8080"
   links:
-    - jenkins-docker-slave:jenkins-docker-slave
+    - jenkins-docker-slave:slave
 
 jenkins-docker-slave:
-  image: base2/ciinabox-jenkins-slave
-  command: dind
+  image: base2/ciinabox-dind-slave
+  privileged: true
   environment:
     - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
     - PORT=4444
   ports:
     - "2223:22"
     - "4444:4444"
-  privileged: true
