@@ -20,42 +20,43 @@ if (!ciinabox) {
 }
 
 def yaml = new Yaml()
-def jobsFile = new File("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/jobs.yml")
-if(!jobsFile.exists()) {
+def processedJobs = false
+new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/", "*jobs.yml").each { String jobsFile ->
+  def jobs = (Map) yaml.load(new File(jobsFile).text)
+  manageJobs(baseDir, username, password, jobs)
+  processedJobs = true
+}
+if(!processedJobs) {
   println "no jobs.yml file found for ${ciinabox} found in ${ciinaboxesDir.absolutePath}/jenkins"
 }
-def jobs = (Map) yaml.load(jobsFile.text)
 
-RestApiJobManagement jm = new RestApiJobManagement(jobs['jenkins_url'])
-if (username && password) {
-    jm.setCredentials username, password
-}
-jobs['jobs'].each { job ->
-  jm.parameters.clear()
-  jm.parameters['baseDir'] = baseDir
-  jm.parameters['jobBaseDir'] = "$baseDir/ciinabox-bootstrap/jenkins"
-  jm.parameters['defaults'] = jobs['defaults']
-  jobTemplate = new File("$baseDir/jobs/${job.get('type','default')}.groovy").text
-  if(!job.containsKey('config')) {
-    job.put('config',[:])
+def manageJobs(def baseDir, def username, def password, def jobs) {
+
+  RestApiJobManagement jm = new RestApiJobManagement(jobs['jenkins_url'])
+  if (username && password) {
+      jm.setCredentials username, password
   }
+  jobs['jobs'].each { job ->
+    jm.parameters.clear()
+    jm.parameters['baseDir'] = baseDir
+    jm.parameters['jobBaseDir'] = "$baseDir/ciinabox-bootstrap/jenkins"
+    jm.parameters['defaults'] = jobs['defaults']
+    jobTemplate = new File("$baseDir/jobs/${job.get('type','default')}.groovy").text
+    if(!job.containsKey('config')) {
+      job.put('config',[:])
+    }
 
-  if(job.containsKey('type') && job.get('type') != 'default') {
-    jobName = job.get("name","${job['repo'].split('/')[1]}-${job['type'].split('/')[1]}")
-  } else if(job.containsKey('name')) {
-    jobName = job.get('name')
-  } else {
-    throw new IllegalArgumentException('job requires either a type or a name')
+    if(job.containsKey('type') && job.get('type') != 'default') {
+      jobName = job.get("name","${job['repo'].split('/')[1]}-${job['type'].split('/')[1]}")
+    } else if(job.containsKey('name')) {
+      jobName = job.get('name')
+    } else {
+      throw new IllegalArgumentException('job requires either a type or a name')
+    }
+    println "\nprocessing job: $jobName"
+
+    jm.parameters << job
+    jm.parameters['jobName'] = jobName
+    DslScriptLoader.runDslEngine(jobTemplate, jm)
   }
-  println "\nprocessing job: $jobName"
-
-  jm.parameters << job
-  jm.parameters['jobName'] = jobName
-  DslScriptLoader.runDslEngine(jobTemplate, jm)
-}
-
-new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/", "jobs/**/*.groovy").each { String fileName ->
-    println "\nprocessing custom job: $fileName"
-    File customTemplate = new File(fileName)
-    DslScriptLoader.runDslEngine(customTemplate.text, jm)
 }
