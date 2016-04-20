@@ -9,25 +9,30 @@ String ciinabox = System.getProperty('ciinabox')
 String ciinaboxes = System.getProperty('ciinaboxes','ciinaboxes')
 String username = System.getProperty('username')
 String password = System.getProperty('password') // password or token
+String jobFileToProcess = System.getProperty('jobfile')
 
 baseDir = new File(".").absolutePath
 baseDir = baseDir.substring(0, baseDir.length()-2)
 ciinaboxesDir = new File(ciinaboxes)
 
 if (!ciinabox) {
-    println 'usage: -Dciinabox=<ciinabox_name> [-Dciinaboxes=<ciinaboxes dir>] [-Dusername=<username>] [-Dpassword=<password>]'
+    println 'usage: -Dciinabox=<ciinabox_name> [-Dciinaboxes=<ciinaboxes dir>] [-Dusername=<username>] [-Dpassword=<password>] [-Djobfile=myjobs.yml]'
     System.exit 1
 }
 
 def yaml = new Yaml()
 def processedJobs = false
 new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/", "*jobs.yml").each { String jobsFile ->
-  def jobs = (Map) yaml.load(new File(jobsFile).text)
-  manageJobs(baseDir, username, password, jobs)
-  processedJobs = true
+  if(jobFileToProcess == null || jobsFile.contains(jobFileToProcess)) {
+    def jobs = (Map) yaml.load(new File(jobsFile).text)
+    println "\nLoading jobs from file: $jobsFile"
+    manageJobs(baseDir, username, password, jobs)
+    processedJobs = true
+  }
 }
 if(!processedJobs) {
-  println "no jobs.yml file found for ${ciinabox} found in ${ciinaboxesDir.absolutePath}/jenkins"
+  j = jobFileToProcess ?: 'jobs.yml'
+  println "no ${j} file found for ${ciinabox} found in ${ciinaboxesDir.absolutePath}/jenkins"
 }
 
 def manageJobs(def baseDir, def username, def password, def jobs) {
