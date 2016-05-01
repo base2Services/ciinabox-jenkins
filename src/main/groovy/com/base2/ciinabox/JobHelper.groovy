@@ -207,15 +207,19 @@ class JobHelper {
   }
 
   static void defaultPublishers(def job, def vars) {
-    def slackChannel = lookupDefault(vars, 'slack_channel', 'devops')
+    def slackChannel = lookupDefault(vars, 'slack_channel')
     job.publishers {
       chucknorris()
-      slackNotifications {
-        projectChannel(slackChannel)
-        notifyBuildStart()
-        notifySuccess()
-        notifyFailure()
-        notifyBackToNormal()
+    }
+    if(slackChannel) {
+      job.publishers {
+        slackNotifications {
+          projectChannel(slackChannel)
+          notifyBuildStart()
+          notifySuccess()
+          notifyFailure()
+          notifyBackToNormal()
+        }
       }
     }
   }
