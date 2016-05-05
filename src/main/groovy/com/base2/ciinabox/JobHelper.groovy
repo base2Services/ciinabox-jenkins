@@ -182,11 +182,13 @@ class JobHelper {
   }
 
   static void gitPush(def job, def branches) {
-    job.publishers {
-      git {
-        pushOnlyIfSuccess()
-        branches.each { brnch ->
-          branch('origin', brnch)
+    if(branches.size() > 0) {
+      job.publishers {
+        git {
+          pushOnlyIfSuccess()
+          branches.each { brnch ->
+            branch('origin', brnch)
+          }
         }
       }
     }
