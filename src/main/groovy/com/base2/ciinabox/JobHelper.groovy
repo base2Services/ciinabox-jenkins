@@ -6,6 +6,7 @@ class JobHelper {
 
   static void defaults(def job, def vars) {
     description(job, vars.get('description',vars.get('jobName','')))
+    labels(job, vars.get('labels', []))
     parameters(job,vars.get('parameters',[:]))
     scm(job,vars)
     copyLatestSuccessfulArtifacts(job, vars.get('artifacts',[]))
@@ -14,6 +15,12 @@ class JobHelper {
     publishers(job, vars)
     archive(job, vars.get('archive', []))
     gitPush(job, vars.get('push',[]))
+  }
+
+  static void labels(def job, def labels) {
+    labels.each {
+      job.label(it)
+    }
   }
 
   static void parameters(def job, def params) {
@@ -182,11 +189,13 @@ class JobHelper {
   }
 
   static void gitPush(def job, def branches) {
-    job.publishers {
-      git {
-        pushOnlyIfSuccess()
-        branches.each { brnch ->
-          branch('origin', brnch)
+    if(branches.size() > 0) {
+      job.publishers {
+        git {
+          pushOnlyIfSuccess()
+          branches.each { brnch ->
+            branch('origin', brnch)
+          }
         }
       }
     }
