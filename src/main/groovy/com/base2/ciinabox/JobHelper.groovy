@@ -42,7 +42,9 @@ class JobHelper {
   }
 
   static void scm(def job, def vars) {
-    if(vars.containsKey('branch')) {
+    if(vars.containsKey('git')) {
+      gitSCM(job, vars.get('git'), vars)
+    } else if(vars.containsKey('branch')) {
       github(job, vars)
     } else if(vars.containsKey('repo')){
       pullRequestScm(job, vars.get('repo'), vars)
@@ -95,8 +97,23 @@ class JobHelper {
     }
   }
 
+  static void gitSCM(def job, def scm, def vars) {
+    def block = mergeWithDefaults(scm, vars, 'git')
+    job.scm {
+      git {
+        remote {
+          url(block.get('url'))
+          credentials(block.get('credentials'))
+          name(block.get('name'))
+          refspec(block.get('refspec'))
+        }
+        branch(block.get('branch'))
+      }
+    }
+  }
+
   static void pullRequestScm(def job, def repo, def vars) {
-    def gh = lookupDefault(vars, 'github', githubDefaults())
+    def gh = lookupDefault(vars, 'github', jobDefaults())
     job.scm {
       git {
         remote {
@@ -123,7 +140,7 @@ class JobHelper {
   }
 
   static void github(def job, def vars) {
-    def gh = lookupDefault(vars, 'github', githubDefaults())
+    def gh = lookupDefault(vars, 'github', jobDefaults())
     def repo = vars.get('repo')
     def buildBranch = vars.get('branch')
     job.scm {
@@ -202,7 +219,7 @@ class JobHelper {
   }
 
   static void publishers(def job, def vars) {
-    def gh = lookupDefault(vars, 'github', githubDefaults())
+    def gh = lookupDefault(vars, 'github', jobDefaults())
     job.publishers {
       if(vars.get('branch') == null && vars.containsKey('repo')) {
         mergePullRequest {
@@ -254,13 +271,51 @@ class JobHelper {
     return upper
   }
 
-  private static githubDefaults() {
-    return [
-      "credentials" : "github",
-      "merge_comment" : "merged by jenkins",
-      "trigger_phrase" : "ok to merge",
-      "org_white_list": [],
-      "cron" : null
+  private static jobDefaults(def key = null) {
+    def defaults = [
+      "github": [
+        "credentials" : "github",
+        "merge_comment" : "merged by jenkins",
+        "trigger_phrase" : "ok to merge",
+        "org_white_list": [],
+        "cron" : null
+      ],
+      "git": [
+        "credentials": "github",
+        "branch": "master",
+        "name": "",
+        "refspec": ""
+      ],
+      "bitbucket": [
+        "credentials": "bitbucket",
+        "cron": "* * * * *",
+        "username": '${BITBUCKET_USER}',
+        "password": '${BITBUCKET_PASSWORD}',
+        "ci_identifier": "jenkins",
+        "ci_name": "jenkins",
+        "ci_skip_phrases": ""
+      ]
     ]
+    return key == null ? defaults : defaults.get(key)
+  }
+
+  private static mergeWithDefaults(def block, def vars, def key) {
+    def defaults =  lookupDefault(vars, key, jobDefaults(key))
+    if(defaults instanceof Map) {
+      defaults = combine( jobDefaults().get(key), defaults, block)
+    }
+    return defaults
+  }
+
+  private static combine( Map... sources ) {
+    if (sources.length == 0) return [:]
+    if (sources.length == 1) return sources[0]
+
+    sources.inject([:]) { result, source ->
+        source.each { k, v ->
+            result[k] = result[k] instanceof Map ? merge(result[k], v) : v
+        }
+        result
+    }
   }
 }
