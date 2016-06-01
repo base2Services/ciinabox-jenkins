@@ -10,6 +10,9 @@ class RestApiJobManagement extends MockJobManagement {
     final RESTClient restClient
 
     RestApiJobManagement(String baseUrl) {
+        if(!baseUrl != null && !baseUrl.endsWith("/")) {
+          baseUrl += "/"
+        }
         restClient = new RESTClient(baseUrl)
         restClient.handler.failure = { it }
     }

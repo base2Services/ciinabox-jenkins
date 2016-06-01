@@ -4,6 +4,8 @@ jenkins_url: http://192.168.99.100:8080/
 
 defaults:
   scripts_dir: ciinaboxes/scripts
+  git:
+    credentials: bitbucket
   github:
     credentials: github
     org_white_list:
@@ -50,3 +52,19 @@ jobs:
         file_pattern: "*.md"
     shell:
       - script: "echo ${APP_BUILD_NUMBER} - `date` >> README.md"
+  -
+    name: Example-Git-SCM
+    folder: example
+    git:
+      url: https://aaronwalker@bitbucket.org/aaronwalker/jenkins-dsl-example.git
+      branch: master
+  -
+    name: Example-Git-Branch-With-Name-And-Creds
+    folder: example
+    git:
+      name: upstream
+      url: https://aaronwalker@bitbucket.org/aaronwalker/jenkins-dsl-example.git
+      credentials: bitbucket2
+      branch: develop
+    shell:
+      - file: example.sh
