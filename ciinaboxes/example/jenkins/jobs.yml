@@ -89,3 +89,13 @@ jobs:
       credentials: customcreds
     shell:
       - file: example.sh
+  -
+    name: Example-BitBucket-With-Custom-Branch
+    folder: example
+    parameters:
+      tag_or_branch: mytag
+    bitbucket:
+      repo: aaronwalker/jenkins-dsl-example
+      branch: "${TAG_OR_BRANCH}"
+    shell:
+      - file: example.sh
