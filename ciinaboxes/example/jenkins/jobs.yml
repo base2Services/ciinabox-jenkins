@@ -5,7 +5,7 @@ jenkins_url: http://192.168.99.100:8080/
 defaults:
   scripts_dir: ciinaboxes/scripts
   git:
-    credentials: bitbucket
+    credentials: gitcreds
   github:
     credentials: github
     org_white_list:
@@ -13,6 +13,8 @@ defaults:
     cron: "* * * * *"
     merge_comment: merge by jenkins
     trigger_phrase: ok to merge
+  bitbucket:
+    credentials: bitbucket
   slack_channel: devops
 
 jobs:
@@ -58,6 +60,8 @@ jobs:
     git:
       url: https://aaronwalker@bitbucket.org/aaronwalker/jenkins-dsl-example.git
       branch: master
+    shell:
+      - file: example.sh
   -
     name: Example-Git-Branch-With-Name-And-Creds
     folder: example
@@ -66,5 +70,22 @@ jobs:
       url: https://aaronwalker@bitbucket.org/aaronwalker/jenkins-dsl-example.git
       credentials: bitbucket2
       branch: develop
+    shell:
+      - file: example.sh
+  -
+    name: Example-BitBucket-With-Branch
+    folder: example
+    bitbucket:
+      repo: aaronwalker/jenkins-dsl-example
+      branch: master
+    shell:
+      - file: example.sh
+  -
+    name: Example-BitBucket-With-Custom-Credentials
+    folder: example
+    bitbucket:
+      repo: aaronwalker/jenkins-dsl-example
+      branch: master
+      credentials: customcreds
     shell:
       - file: example.sh

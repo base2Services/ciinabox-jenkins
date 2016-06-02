@@ -44,6 +44,8 @@ class JobHelper {
   static void scm(def job, def vars) {
     if(vars.containsKey('git')) {
       gitSCM(job, vars.get('git'), vars)
+    } else if(vars.containsKey('bitbucket')) {
+      bitbucket(job, vars.get('bitbucket'), vars)
     } else if(vars.containsKey('branch')) {
       github(job, vars)
     } else if(vars.containsKey('repo')){
@@ -108,6 +110,7 @@ class JobHelper {
           refspec(block.get('refspec'))
         }
         branch(block.get('branch'))
+        wipeOutWorkspace()
       }
     }
   }
@@ -150,6 +153,20 @@ class JobHelper {
           github(repo)
         }
         branch(buildBranch)
+        wipeOutWorkspace()
+      }
+    }
+  }
+
+  static void bitbucket(def job, def scm, def vars) {
+    def block = mergeWithDefaults(scm, vars, 'bitbucket')
+    job.scm {
+      git {
+        remote {
+          credentials(block.get('credentials'))
+          url("https://bitbucket.org/${block.get('repo')}.git")
+        }
+        branch(block.get('branch'))
         wipeOutWorkspace()
       }
     }
