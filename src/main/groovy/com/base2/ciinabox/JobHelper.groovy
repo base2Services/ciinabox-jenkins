@@ -154,6 +154,9 @@ class JobHelper {
         }
         branch(buildBranch)
         wipeOutWorkspace()
+        if (vars.containsKey('subdirectory')) {
+          relativeTargetDir(vars.get('subdirectory'))
+        }
       }
     }
   }
