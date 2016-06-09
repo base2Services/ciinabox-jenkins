@@ -127,6 +127,9 @@ class JobHelper {
         }
         branch(block.get('branch'))
         wipeOutWorkspace()
+        if(block.containsKey('repo_target_dir')) {
+          relativeTargetDir(block.get('repo_target_dir'))
+        }
       }
     }
   }
@@ -141,6 +144,9 @@ class JobHelper {
           refspec('+refs/pull/*:refs/remotes/origin/pr/*')
         }
         branch('${sha1}')
+        if(gh.containsKey('repo_target_dir')) {
+          relativeTargetDir(gh.get('repo_target_dir'))
+        }
       }
     }
     job.triggers {
@@ -170,6 +176,9 @@ class JobHelper {
         }
         branch(buildBranch)
         wipeOutWorkspace()
+        if(block.containsKey('repo_target_dir')) {
+          relativeTargetDir(gh.block('repo_target_dir'))
+        }
       }
     }
   }
@@ -184,6 +193,9 @@ class JobHelper {
         }
         branch(block.get('branch'))
         wipeOutWorkspace()
+        if(block.containsKey('repo_target_dir')) {
+          relativeTargetDir(block.get('repo_target_dir'))
+        }
       }
     }
   }
