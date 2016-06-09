@@ -16,6 +16,9 @@ defaults:
   bitbucket:
     credentials: bitbucket
   slack_channel: devops
+  build_environment:
+    environment:
+      global_var: myglobalenvvar
 
 jobs:
   -
@@ -30,6 +33,8 @@ jobs:
     repo: base2Services/ciinabox-ecs
     build_environment:
       ssh_agent: mykey
+      environment:
+        my_env_var: test
     github:
       protocol: ssh
     shell:

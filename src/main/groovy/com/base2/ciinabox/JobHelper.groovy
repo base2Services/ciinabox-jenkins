@@ -56,10 +56,15 @@ class JobHelper {
 
   static void buildEnvironment(def job, def buildEnv, def vars) {
     def env = mergeWithDefaults(buildEnv, vars, 'build_environment')
-    println(env)
     job.wrappers {
       if(env.containsKey('ssh_agent')) {
         sshAgent(env.get('ssh_agent'))
+      }
+      if(env.containsKey('environment')) {
+        def environment = toUpperCaseKeys(env.get('environment', [:]))
+        environmentVariables {
+          envs(environment)
+        }
       }
     }
   }
@@ -344,7 +349,7 @@ class JobHelper {
 
     sources.inject([:]) { result, source ->
         source.each { k, v ->
-            result[k] = result[k] instanceof Map ? merge(result[k], v) : v
+            result[k] = result[k] instanceof Map ? combine(result[k], v) : v
         }
         result
     }
