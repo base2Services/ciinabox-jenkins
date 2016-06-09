@@ -47,9 +47,9 @@ class JobHelper {
     } else if(vars.containsKey('bitbucket')) {
       bitbucket(job, vars.get('bitbucket'), vars)
     } else if(vars.containsKey('branch')) {
-      github(job, vars)
+      githubScm(job, vars.get('github',[:]), vars)
     } else if(vars.containsKey('repo')){
-      pullRequestScm(job, vars.get('repo'), vars)
+      pullRequestScm(job, vars.get('github',[:]), vars.get('repo'), vars)
     }
   }
 
@@ -115,13 +115,13 @@ class JobHelper {
     }
   }
 
-  static void pullRequestScm(def job, def repo, def vars) {
-    def gh = lookupDefault(vars, 'github', jobDefaults())
+  static void pullRequestScm(def job, def scm, def repo, def vars) {
+    def gh = mergeWithDefaults(scm, vars, 'github')
     job.scm {
       git {
         remote {
-          credentials(gh.get('credentials','github'))
-          github(repo)
+          credentials(gh.get('credentials'))
+          github(repo, gh.get('protocol'), gh.get('host'))
           refspec('+refs/pull/*:refs/remotes/origin/pr/*')
         }
         branch('${sha1}')
@@ -142,15 +142,15 @@ class JobHelper {
     }
   }
 
-  static void github(def job, def vars) {
-    def gh = lookupDefault(vars, 'github', jobDefaults())
+  static void githubScm(def job, def scm, def vars) {
+    def block = mergeWithDefaults(scm, vars, 'github')
     def repo = vars.get('repo')
     def buildBranch = vars.get('branch')
     job.scm {
       git {
         remote {
-          credentials(gh.get('credentials','github'))
-          github(repo)
+          credentials(block.get('credentials'))
+          github(repo, block.get('protocol'), block.get('host'))
         }
         branch(buildBranch)
         wipeOutWorkspace()
@@ -295,7 +295,9 @@ class JobHelper {
         "merge_comment" : "merged by jenkins",
         "trigger_phrase" : "ok to merge",
         "org_white_list": [],
-        "cron" : null
+        "cron" : null,
+        "protocol": "https",
+        "host": "github.com"
       ],
       "git": [
         "credentials": "github",
