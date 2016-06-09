@@ -1,7 +1,6 @@
  #ciinabox jenkins config
 
-# jenkins_url: http://192.168.99.100:8080/
-jenkins_url: http://jenkins.ci.base2.services/
+jenkins_url: http://192.168.99.100:8080/
 
 defaults:
   scripts_dir: ciinaboxes/scripts
@@ -29,6 +28,8 @@ jobs:
     name: Example-Pull-Request-GitHub-SSH
     folder: example
     repo: base2Services/ciinabox-ecs
+    build_environment:
+      ssh_agent: mykey
     github:
       protocol: ssh
     shell:

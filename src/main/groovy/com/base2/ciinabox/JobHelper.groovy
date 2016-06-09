@@ -10,6 +10,7 @@ class JobHelper {
     parameters(job,vars.get('parameters',[:]))
     scm(job,vars)
     copyLatestSuccessfulArtifacts(job, vars.get('artifacts',[]))
+    buildEnvironment(job, vars.get('build_environment', [:]), vars)
     steps(job,vars)
     triggerJobs(job,vars.get('trigger',[:]),vars)
     publishers(job, vars)
@@ -50,6 +51,16 @@ class JobHelper {
       githubScm(job, vars.get('github',[:]), vars)
     } else if(vars.containsKey('repo')){
       pullRequestScm(job, vars.get('github',[:]), vars.get('repo'), vars)
+    }
+  }
+
+  static void buildEnvironment(def job, def buildEnv, def vars) {
+    def env = mergeWithDefaults(buildEnv, vars, 'build_environment')
+    println(env)
+    job.wrappers {
+      if(env.containsKey('ssh_agent')) {
+        sshAgent(env.get('ssh_agent'))
+      }
     }
   }
 
@@ -313,7 +324,8 @@ class JobHelper {
         "ci_identifier": "jenkins",
         "ci_name": "jenkins",
         "ci_skip_phrases": ""
-      ]
+      ],
+      "build_environment":[:]
     ]
     return key == null ? defaults : defaults.get(key)
   }
