@@ -14,6 +14,7 @@ class RestApiJobManagement extends MockJobManagement {
           baseUrl += "/"
         }
         restClient = new RESTClient(baseUrl)
+        restClient.ignoreSSLIssues()
         restClient.handler.failure = { it }
     }
 
