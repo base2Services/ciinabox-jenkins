@@ -115,8 +115,13 @@ class JobHelper {
     }
   }
 
-  static void gitSCM(def job, def scm, def vars) {
-    def block = mergeWithDefaults(scm, vars, 'git')
+  static void gitSCM(def job, def source, def vars) {
+    def block = mergeWithDefaults(source, vars, 'git')
+    job.triggers {
+        if(block.containsKey('cron')) {
+            scm(block.get('cron'))
+        }
+    }
     job.scm {
       git {
         remote {
@@ -129,6 +134,13 @@ class JobHelper {
         wipeOutWorkspace()
         if(block.containsKey('repo_target_dir')) {
           relativeTargetDir(block.get('repo_target_dir'))
+        }
+        configure {
+            if(block.containsKey('excluded_users')) {
+                it / 'extensions' / 'hudson.plugins.git.extensions.impl.UserExclusion' {
+                    'excludedUsers'(block.get('excluded_users'))
+                }
+            }
         }
       }
     }
