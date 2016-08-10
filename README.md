@@ -29,6 +29,12 @@ Creating ciinaboxjenkins_jenkins_1
 
 ### Running the example ciinabox Jenkins configuration
 
+Create a symlink to your ciinaboxes directory for example
+
+```sh
+$ ln -s ciinaboxes.example ciinaboxes
+```
+
 Ensure the example ciinabox jenkins url matches you
 
 ```sh
