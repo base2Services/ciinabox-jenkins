@@ -13,6 +13,7 @@ class RestApiJobManagement extends MockJobManagement {
         if(!baseUrl != null && !baseUrl.endsWith("/")) {
           baseUrl += "/"
         }
+        println("using jenkins url: ${baseUrl}")
         restClient = new RESTClient(baseUrl)
         restClient.ignoreSSLIssues()
         restClient.handler.failure = { it }

@@ -97,15 +97,24 @@ class JobHelper {
   }
 
   static void dslSteps(def job, def vars) {
+    def scriptDir = lookupDefault(vars,'scripts_dir','ciinaboxes')
     def dslStep = vars.get('dsl')
     if(dslStep != null) {
       def dslSource = dslStep.get('filter','')
+      def dslFile = new File(scriptDir, dslStep.get('file'))
+      if(dslFile.exists()) {
+        dslSource = dslFile.text
+      }
       def remove = dslStep.get('remove_action','DISABLE')
       def ignore = dslStep.get('ignore_existing',false)
       def classpath = dslStep.get('additional_classpath')
       job.steps {
         dsl {
-          external(dslSource)
+          if(dslFile.exists()) {
+            text(dslSource)
+          } else {
+            external(dslSource)
+          }
           ignoreExisting(ignore)
           removeAction(remove)
           if(classpath != null) {

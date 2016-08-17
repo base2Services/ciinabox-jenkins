@@ -10,13 +10,14 @@ String ciinaboxes = System.getProperty('ciinaboxes','ciinaboxes')
 String username = System.getProperty('username')
 String password = System.getProperty('password') // password or token
 String jobFileToProcess = System.getProperty('jobfile')
+String jenkinsOverrideUrl = System.getProperty('url')
 
 baseDir = new File(".").absolutePath
 baseDir = baseDir.substring(0, baseDir.length()-2)
 ciinaboxesDir = new File(ciinaboxes)
 
 if (!ciinabox) {
-    println 'usage: -Dciinabox=<ciinabox_name> [-Dciinaboxes=<ciinaboxes dir>] [-Dusername=<username>] [-Dpassword=<password>] [-Djobfile=myjobs.yml]'
+    println 'usage: -Dciinabox=<ciinabox_name> [-Dciinaboxes=<ciinaboxes dir>] [-Durl=<jenkins_url>] [-Dusername=<username>] [-Dpassword=<password>] [-Djobfile=myjobs.yml]'
     System.exit 1
 }
 
@@ -26,6 +27,9 @@ new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jen
   if(jobFileToProcess == null || jobsFile.contains(jobFileToProcess)) {
     def jobs = (Map) yaml.load(new File(jobsFile).text)
     println "\nLoading jobs from file: $jobsFile"
+    if(jenkinsOverrideUrl != null) {
+      jobs['jenkins_url'] = jenkinsOverrideUrl
+    }
     manageJobs(baseDir, username, password, jobs)
     processedJobs = true
   }
