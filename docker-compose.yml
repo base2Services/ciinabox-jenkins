@@ -1,5 +1,5 @@
 jenkins:
-  image: base2/ciinabox-jenkins
+  image: base2/ciinabox-jenkins:2
   environment:
     - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
   ports:
