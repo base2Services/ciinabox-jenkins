@@ -14,6 +14,7 @@ class JobHelper {
     steps(job,vars)
     triggerJobs(job,vars.get('trigger',[:]),vars)
     publishers(job, vars)
+    postTriggerJobs(job,vars.get('post_trigger',[]),vars)
     archive(job, vars.get('archive', []))
     gitPush(job, vars.get('push',[]))
   }
@@ -240,6 +241,25 @@ class JobHelper {
                 unstable('UNSTABLE')
               }
             }
+            parameters {
+              if(triggerJob.get('curent_parameters',false)) {
+                currentBuild()
+              }
+              if(triggerJob.containsKey('parameters')) {
+                predefinedProps(toUpperCaseKeys(triggerJob.get('parameters',[:])))
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  static postTriggerJobs(def job, def triggers, def vars) {
+    job.publishers {
+      triggers.each { triggerJob ->
+        downstreamParameterized {
+          trigger(triggerJob.get('job')) {
             parameters {
               if(triggerJob.get('curent_parameters',false)) {
                 currentBuild()
