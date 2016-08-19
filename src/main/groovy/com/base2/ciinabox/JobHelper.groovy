@@ -9,7 +9,7 @@ class JobHelper {
     labels(job, vars.get('labels', []))
     parameters(job,vars.get('parameters',[:]))
     scm(job,vars)
-    copyLatestSuccessfulArtifacts(job, vars.get('artifacts',[]))
+    copyLatestSuccessfulArtifacts(job, vars.get('artifacts',[]), vars.get('jobNames',[]))
     buildEnvironment(job, vars.get('build_environment', [:]), vars)
     steps(job,vars)
     triggerJobs(job,vars.get('trigger',[:]),vars)
@@ -222,16 +222,32 @@ class JobHelper {
     }
   }
 
-  static void copyLatestSuccessfulArtifacts(def job, def artifacts) {
+  static void copyLatestSuccessfulArtifacts(def job, def artifacts, def jobNames = []) {
     artifacts.each { artifact ->
       job.steps {
-        copyArtifacts(artifact.get('job')) {
-          includePatterns(artifact.get('file_pattern'))
-          targetDirectory(artifact.get('target_directory',''))
-          flatten()
-          fingerprintArtifacts()
-          buildSelector {
-            latestSuccessful(true)
+        if(artifact.get('job').contains("*")) {
+          def pattern = artifact.get('job').replaceAll(/\*/, "(.*)")
+          def matchingJobs = matchJobName(pattern, jobNames)
+          matchingJobs.each { jobName ->
+            copyArtifacts(jobName) {
+              includePatterns(artifact.get('file_pattern'))
+              targetDirectory(artifact.get('target_directory',''))
+              flatten()
+              fingerprintArtifacts()
+              buildSelector {
+                latestSuccessful(true)
+              }
+            }
+          }
+        } else {
+          copyArtifacts(artifact.get('job')) {
+            includePatterns(artifact.get('file_pattern'))
+            targetDirectory(artifact.get('target_directory',''))
+            flatten()
+            fingerprintArtifacts()
+            buildSelector {
+              latestSuccessful(true)
+            }
           }
         }
       }
@@ -406,5 +422,9 @@ class JobHelper {
         }
         result
     }
+  }
+
+  private static matchJobName(def pattern, def jobNames) {
+    jobNames.findAll { it =~ pattern }
   }
 }

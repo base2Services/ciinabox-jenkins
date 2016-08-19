@@ -126,3 +126,14 @@ jobs:
       branch: "${TAG_OR_BRANCH}"
     shell:
       - file: example.sh
+  -
+    name: Example-Branch-With-Copy-Artifact-Wildcard
+    folder: example
+    parameters:
+      app_build_number: ""
+    artifacts:
+      -
+        job: example/Example-Branch-With-Artifact-*
+        file_pattern: "*.md"
+    shell:
+      - script: "echo ${APP_BUILD_NUMBER} - `date` >> README.md"
