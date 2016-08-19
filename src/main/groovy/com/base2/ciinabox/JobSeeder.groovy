@@ -45,6 +45,10 @@ def manageJobs(def baseDir, def username, def password, def jobs) {
   if (username && password) {
       jm.setCredentials username, password
   }
+  def jobNames = []
+  jobs['jobs'].each { job ->
+    jobNames << job.get('folder','') + '/' + job.get('name')
+  }
   jobs['jobs'].each { job ->
     jm.parameters.clear()
     jm.parameters['baseDir'] = baseDir
@@ -66,6 +70,7 @@ def manageJobs(def baseDir, def username, def password, def jobs) {
 
     jm.parameters << job
     jm.parameters['jobName'] = jobName
+    jm.parameters['jobNames'] = jobNames
     DslScriptLoader.runDslEngine(jobTemplate, jm)
   }
 }
