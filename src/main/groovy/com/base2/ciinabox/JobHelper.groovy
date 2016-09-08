@@ -73,6 +73,7 @@ class JobHelper {
   static void steps(def job, def vars) {
     shellSteps(job, vars)
     dslSteps(job,vars)
+    gradleSteps(job,vars)
   }
 
   static void shellSteps(def job, def vars) {
@@ -119,6 +120,44 @@ class JobHelper {
           removeAction(remove)
           if(classpath != null) {
             additionalClasspath(classpath)
+          }
+        }
+      }
+    }
+  }
+
+  static void gradleSteps(def job, def vars) {
+    def gradleStep = vars.get('gradle',null)
+    if(gradleStep == null) {
+      return
+    }
+    job.steps {
+      gradle {
+        gradleStep.each { type, value ->
+          switch(type) {
+            case 'build_file':
+              buildFile(value)
+            break
+            case 'gradle_name':
+              gradleName(value)
+            break
+            case 'root_build_script_dir':
+              rootBuildScriptDir(value)
+            break
+            case 'use_wrapper':
+              useWrapper(value)
+              makeExecutable()
+            break
+            case 'tasks':
+              value.each { t ->
+                tasks(t)
+              }
+            break
+            case 'switches':
+              value.each { s ->
+                switches(s)
+              }
+            break
           }
         }
       }

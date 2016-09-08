@@ -1,6 +1,6 @@
  #ciinabox jenkins config
 
-jenkins_url: http://192.168.99.100:8080/
+jenkins_url: http://localhost:8080/
 
 defaults:
   scripts_dir: ciinaboxes/scripts
@@ -137,3 +137,18 @@ jobs:
         file_pattern: "*.md"
     shell:
       - script: "echo ${APP_BUILD_NUMBER} - `date` >> README.md"
+  -
+    name: Example-GitHub-Gradle
+    folder: example
+    repo: base2Services/ciinabox-jenkins
+    branch: master
+    gradle:
+      build_file: build.gradle
+      gradle_name: default
+      # root_build_script_dir: build/
+      # use_wrapper: true
+      tasks:
+        - clean
+        - check
+      switches:
+        - "--info"
