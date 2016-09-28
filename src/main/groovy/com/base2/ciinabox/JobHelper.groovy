@@ -238,7 +238,7 @@ class JobHelper {
         branch(buildBranch)
         wipeOutWorkspace()
         if(block.containsKey('repo_target_dir')) {
-          relativeTargetDir(gh.block('repo_target_dir'))
+          relativeTargetDir(block.get('repo_target_dir'))
         }
       }
     }
