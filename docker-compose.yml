@@ -16,3 +16,5 @@ jenkins-docker-slave:
   ports:
     - "2223:22"
     - "4444:4444"
+  volumes:
+    - $HOME/.aws/:/home/jenkins/.aws
