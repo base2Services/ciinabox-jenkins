@@ -152,3 +152,13 @@ jobs:
         - check
       switches:
         - "--info"
+  -
+    name: Example-Create-Secrets
+    folder: example
+    discardBuilds:
+      buildsToKeep: 1
+      daysToKeep: 1
+      artifactBuildsToKeep: 1
+      artifactDaysToKeep: 1
+    shell:
+      - file: create-secrets.sh
