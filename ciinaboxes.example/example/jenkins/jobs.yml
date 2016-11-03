@@ -162,3 +162,9 @@ jobs:
       artifactDaysToKeep: 1
     shell:
       - file: create-secrets.sh
+  -
+    name: Example-trigger-job-with-cron
+    folder: conctr
+    cronTrigger: "0 8 * * *"
+    shell:
+      - file: start-environment.sh
