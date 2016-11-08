@@ -7,7 +7,9 @@ class JobHelper {
   static void defaults(def job, def vars) {
     description(job, vars.get('description',vars.get('jobName','')))
     labels(job, vars.get('labels', []))
+    discardBuilds(job, vars)
     parameters(job,vars.get('parameters',[:]))
+    cronTrigger(job,vars)
     scm(job,vars)
     copyLatestSuccessfulArtifacts(job, vars.get('artifacts',[]), vars.get('jobNames',[]))
     buildEnvironment(job, vars.get('build_environment', [:]), vars)
@@ -393,6 +395,30 @@ class JobHelper {
 
   static void description(def job, def desc) {
     job.description(desc)
+  }
+
+  static void discardBuilds(def job, def vars) {
+    if (vars.containsKey('discardBuilds')) {
+      def parameters = vars.get('discardBuilds')
+      def builds = (parameters.containsKey('buildsToKeep') ? parameters.get('buildsToKeep') : -1 )
+      def days = (parameters.containsKey('daysToKeep') ? parameters.get('daysToKeep') : -1 )
+      def artifactBuilds = (parameters.containsKey('artifactBuildsToKeep') ? parameters.get('artifactBuildsToKeep') : -1 )
+      def artifactDays = (parameters.containsKey('artifactDaysToKeep') ? parameters.get('artifactDaysToKeep') : -1 )
+      job.logRotator {
+        numToKeep(builds)
+        daysToKeep(days)
+        artifactNumToKeep(artifactBuilds)
+        artifactDaysToKeep(artifactDays)
+      }
+    }
+  }
+
+  static void cronTrigger(def job, def vars) {
+    if(vars.containsKey('cronTrigger')) {
+      job.triggers {
+        cron(vars.get('cronTrigger'))
+      }
+    }
   }
 
   private static boolean isCollectionOrArray(object) {
