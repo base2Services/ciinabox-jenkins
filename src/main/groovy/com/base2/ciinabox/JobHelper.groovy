@@ -9,6 +9,7 @@ class JobHelper {
     labels(job, vars.get('labels', []))
     discardBuilds(job, vars)
     parameters(job,vars.get('parameters',[:]))
+    cronTrigger(job,vars)
     scm(job,vars)
     copyLatestSuccessfulArtifacts(job, vars.get('artifacts',[]), vars.get('jobNames',[]))
     buildEnvironment(job, vars.get('build_environment', [:]), vars)
@@ -408,6 +409,14 @@ class JobHelper {
         daysToKeep(days)
         artifactNumToKeep(artifactBuilds)
         artifactDaysToKeep(artifactDays)
+      }
+    }
+  }
+
+  static void cronTrigger(def job, def vars) {
+    if(vars.containsKey('cronTrigger')) {
+      job.triggers {
+        cron(vars.get('cronTrigger'))
       }
     }
   }
