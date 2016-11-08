@@ -1,6 +1,7 @@
 package com.base2.ciinabox
 
 import javaposse.jobdsl.dsl.DslScriptLoader
+import org.apache.commons.lang.StringUtils
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.Yaml
 import com.base2.rest.RestApiJobManagement
@@ -10,6 +11,7 @@ String ciinaboxes = System.getProperty('ciinaboxes','ciinaboxes')
 String username = System.getProperty('username')
 String password = System.getProperty('password') // password or token
 String jobFileToProcess = System.getProperty('jobfile')
+String jobToProcess = System.getProperty('job')
 String jenkinsOverrideUrl = System.getProperty('url')
 
 baseDir = new File(".").absolutePath
@@ -30,6 +32,13 @@ new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jen
     if(jenkinsOverrideUrl != null) {
       jobs['jenkins_url'] = jenkinsOverrideUrl
     }
+
+    //if specific job is defined
+    if(jobs['jobs'] && StringUtils.isNotEmpty(jobToProcess)){
+      jobs['jobs'] = jobs['jobs'].findAll {
+          (it['name']==null) || (it['name'].equalsIgnoreCase(jobToProcess)) }
+    }
+
     manageJobs(baseDir, username, password, jobs)
     processedJobs = true
   }
