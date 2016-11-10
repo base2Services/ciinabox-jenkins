@@ -8,6 +8,7 @@ class JobHelper {
     description(job, vars.get('description',vars.get('jobName','')))
     labels(job, vars.get('labels', []))
     discardBuilds(job, vars)
+    concurrentBuilds(job, vars)
     parameters(job,vars.get('parameters',[:]))
     cronTrigger(job,vars)
     scm(job,vars)
@@ -410,6 +411,12 @@ class JobHelper {
         artifactNumToKeep(artifactBuilds)
         artifactDaysToKeep(artifactDays)
       }
+    }
+  }
+
+  static void concurrentBuilds(def job, def vars) {
+    if (vars.get('concurrentBuild',false)) {
+      job.concurrentBuild()
     }
   }
 
