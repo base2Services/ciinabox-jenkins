@@ -249,11 +249,17 @@ class JobHelper {
 
   static void bitbucket(def job, def scm, def vars) {
     def block = mergeWithDefaults(scm, vars, 'bitbucket')
+    def protocol = (block.get('protocol') == 'ssh' ? 'git@bitbucket.org:' : 'https://bitbucket.org/' )
+    if(block.get('push',false)) {
+      job.triggers{
+        bitbucketPush()
+      }
+    }
     job.scm {
       git {
         remote {
           credentials(block.get('credentials'))
-          url("https://bitbucket.org/${block.get('repo')}.git")
+          url("${protocol}${block.get('repo')}.git")
         }
         branch(block.get('branch'))
         wipeOutWorkspace()
