@@ -69,6 +69,11 @@ class JobHelper {
           envs(environment)
         }
       }
+      if (env.containsKey('build_user_vars')) {
+        if (env.get('build_user_vars')) {
+          delegate.wrapperNodes << new NodeBuilder().'org.jenkinsci.plugins.builduser.BuildUser' {}
+        }
+      }
     }
   }
 
