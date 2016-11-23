@@ -155,6 +155,7 @@ jobs:
   -
     name: Example-Create-Secrets
     folder: example
+    concurrentBuild: true
     discardBuilds:
       buildsToKeep: 1
       daysToKeep: 1
