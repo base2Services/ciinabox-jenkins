@@ -72,7 +72,7 @@ def manageJobs(def baseDir, def username, def password, def objJobFile) {
     jm.parameters.clear()
     jm.parameters['baseDir'] = baseDir
     jm.parameters['jobBaseDir'] = "$baseDir/ciinabox-bootstrap/jenkins"
-    if(objJobFile['defaults']) {
+    if (objJobFile['defaults']) {
       jm.parameters['defaults'] = objJobFile['defaults']
     }
     jobTemplate = new File("$baseDir/jobs/${job.get('type', 'default')}.groovy").text
@@ -89,6 +89,11 @@ def manageJobs(def baseDir, def username, def password, def objJobFile) {
     else {
       throw new IllegalArgumentException('job requires either a type or a name')
     }
+
+    if (!job['folder']) {
+      job['folder'] = ''
+    }
+
     println "\nprocessing job: $jobName"
 
     jm.parameters << job
