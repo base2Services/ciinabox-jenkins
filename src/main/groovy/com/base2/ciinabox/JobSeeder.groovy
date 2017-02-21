@@ -27,7 +27,7 @@ if (!ciinabox) {
 
 def yaml = new Yaml()
 def processedJobs = false
-new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/", "*jobs.yml").each {String jobsFile ->
+new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/", "*.yml").each {String jobsFile ->
 
   def matchingByJobfile =
           jobFileToProcess != null &&
@@ -58,21 +58,23 @@ if (!processedJobs) {
   println "no ${j} file found for ${ciinabox} found in ${ciinaboxesDir.absolutePath}/jenkins"
 }
 
-def manageJobs(def baseDir, def username, def password, def jobs) {
+def manageJobs(def baseDir, def username, def password, def objJobFile) {
 
-  RestApiJobManagement jm = new RestApiJobManagement(jobs['jenkins_url'])
+  RestApiJobManagement jm = new RestApiJobManagement(objJobFile['jenkins_url'])
   if (username && password) {
     jm.setCredentials username, password
   }
   def jobNames = []
-  jobs['jobs'].each {job ->
+  objJobFile['jobs'].each {job ->
     jobNames << job.get('folder', '') + '/' + job.get('name')
   }
-  jobs['jobs'].each {job ->
+  objJobFile['jobs'].each {job ->
     jm.parameters.clear()
     jm.parameters['baseDir'] = baseDir
     jm.parameters['jobBaseDir'] = "$baseDir/ciinabox-bootstrap/jenkins"
-    jm.parameters['defaults'] = jobs['defaults']
+    if (objJobFile['defaults']) {
+      jm.parameters['defaults'] = objJobFile['defaults']
+    }
     jobTemplate = new File("$baseDir/jobs/${job.get('type', 'default')}.groovy").text
     if (!job.containsKey('config')) {
       job.put('config', [:])
@@ -87,6 +89,11 @@ def manageJobs(def baseDir, def username, def password, def jobs) {
     else {
       throw new IllegalArgumentException('job requires either a type or a name')
     }
+
+    if (!job['folder']) {
+      job['folder'] = ''
+    }
+
     println "\nprocessing job: $jobName"
 
     jm.parameters << job

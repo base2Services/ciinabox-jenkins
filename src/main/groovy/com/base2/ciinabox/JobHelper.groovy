@@ -40,7 +40,7 @@ class JobHelper {
         }
       } else {
         job.parameters {
-          stringParam(param.toUpperCase(),value,'')
+          stringParam(param.toUpperCase(),value.toString(),'')
         }
       }
     }
