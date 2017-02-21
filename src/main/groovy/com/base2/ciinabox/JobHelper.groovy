@@ -335,6 +335,16 @@ class JobHelper {
               if(triggerJob.containsKey('parameters')) {
                 predefinedProps(toUpperCaseKeys(triggerJob.get('parameters',[:])))
               }
+              if(triggerJob.containsKey('properties_file')){
+                def properties_file = triggerJob.get('properties_file')
+                if(properties_file instanceof Map){
+                  propertiesFile(properties_file['name'],properties_file['fail_on_missing'])
+                }else if(properties_file instanceof String){
+                  propertiesFile(properties_file)
+                } else {
+                  throw new RuntimeException("Properties file must be given as map of name/fail_on_missing keys or string with file name")
+                }
+              }
             }
           }
         }
