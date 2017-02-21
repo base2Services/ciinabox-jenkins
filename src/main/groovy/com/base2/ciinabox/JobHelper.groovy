@@ -219,12 +219,13 @@ class JobHelper {
       }
     }
     job.triggers {
+      def hooks = gh.get('use_hooks')
       def orgs = gh.get('org_white_list')
       def pollCron = gh.get('cron')
       def pr = pullRequest {
         orgWhitelist(orgs)
         cron(pollCron)
-        useGitHubHooks()
+        useGitHubHooks(hooks)
         triggerPhrase(gh.get('trigger_phrase',"ok to merge"))
         permitAll()
         autoCloseFailedPullRequests(false)
@@ -465,7 +466,8 @@ class JobHelper {
         "org_white_list": [],
         "cron" : null,
         "protocol": "https",
-        "host": "github.com"
+        "host": "github.com",
+        "use_hooks" : true
       ],
       "git": [
         "credentials": "github",
