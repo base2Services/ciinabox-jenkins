@@ -289,7 +289,11 @@ class JobHelper {
               flatten()
               fingerprintArtifacts()
               buildSelector {
-                latestSuccessful(true)
+                if (artifact.containsKey('build_number')) {
+                  buildNumber(artifact.get('build_number'))
+                } else {
+                  latestSuccessful(true)
+                }
               }
             }
           }
@@ -300,7 +304,11 @@ class JobHelper {
             flatten()
             fingerprintArtifacts()
             buildSelector {
-              latestSuccessful(true)
+              if (artifact.containsKey('build_number')) {
+                buildNumber(artifact.get('build_number'))
+              } else {
+                latestSuccessful(true)
+              }
             }
           }
         }
