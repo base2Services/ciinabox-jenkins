@@ -253,12 +253,17 @@ class JobHelper {
     }
   }
 
-  static void bitbucket(def job, def scm, def vars) {
-    def block = mergeWithDefaults(scm, vars, 'bitbucket')
+  static void bitbucket(def job, def scmConf, def vars) {
+    def block = mergeWithDefaults(scmConf, vars, 'bitbucket')
     def protocol = (block.get('protocol') == 'ssh' ? 'git@bitbucket.org:' : 'https://bitbucket.org/' )
     if(block.get('push',false)) {
       job.triggers{
         bitbucketPush()
+      }
+    }
+    if(block.containsKey('cron')) {
+      job.triggers {
+        scm(block.get('cron'))
       }
     }
     job.scm {
@@ -495,7 +500,6 @@ class JobHelper {
       ],
       "bitbucket": [
         "credentials": "bitbucket",
-        "cron": "* * * * *",
         "username": '${BITBUCKET_USER}',
         "password": '${BITBUCKET_PASSWORD}',
         "ci_identifier": "jenkins",
