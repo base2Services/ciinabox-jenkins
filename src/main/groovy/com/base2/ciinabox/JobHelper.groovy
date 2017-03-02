@@ -480,7 +480,6 @@ class JobHelper {
       ],
       "bitbucket": [
         "credentials": "bitbucket",
-        "cron": "* * * * *",
         "username": '${BITBUCKET_USER}',
         "password": '${BITBUCKET_PASSWORD}',
         "ci_identifier": "jenkins",
