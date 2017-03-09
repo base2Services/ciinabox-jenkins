@@ -1,6 +1,7 @@
 package com.base2.ciinabox
 
-import javaposse.jobdsl.dsl.Job
+import com.base2.ciinabox.ext.ICiinaboxExtension
+import com.base2.util.ReflectionUtils
 
 class JobHelper {
 
@@ -20,6 +21,12 @@ class JobHelper {
     postTriggerJobs(job,vars.get('post_trigger',[]),vars)
     archive(job, vars.get('archive', []))
     gitPush(job, vars.get('push',[]))
+
+
+    ReflectionUtils.getTypesImplementingInterface(ICiinaboxExtension,'com.base2.ciinabox.ext').each { clazz ->
+      (clazz.newInstance() as ICiinaboxExtension).extend(job, vars)
+    }
+
   }
 
   static void labels(def job, def labels) {
