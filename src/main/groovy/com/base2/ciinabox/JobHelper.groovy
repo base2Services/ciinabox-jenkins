@@ -334,7 +334,7 @@ class JobHelper {
               }
             }
             parameters {
-              if(triggerJob.get('curent_parameters',false)) {
+              if(triggerJob.get('current_parameters',false)) {
                 currentBuild()
               }
               if(triggerJob.containsKey('parameters')) {
@@ -363,7 +363,7 @@ class JobHelper {
         downstreamParameterized {
           trigger(triggerJob.get('job')) {
             parameters {
-              if(triggerJob.get('curent_parameters',false)) {
+              if(triggerJob.get('current_parameters',false)) {
                 currentBuild()
               }
               if(triggerJob.containsKey('parameters')) {

@@ -59,7 +59,7 @@ jobs:
     trigger:
       -
         job: example/Example-Branch-With-Copy-Artifact-No-SCM
-        curent_parameters: true
+        current_parameters: true
         block: true
         parameters:
           app_build_number: $BUILD_NUMBER
