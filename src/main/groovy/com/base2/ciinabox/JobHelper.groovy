@@ -1,10 +1,7 @@
 package com.base2.ciinabox
 
 import com.base2.ciinabox.ext.ICiinaboxExtension
-import com.base2.ciinabox.ext.TriggeredByExtension
 import com.base2.util.ReflectionUtils
-import javafx.scene.effect.Reflection
-import javaposse.jobdsl.dsl.Job
 
 class JobHelper {
 
