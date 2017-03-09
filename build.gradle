@@ -18,7 +18,12 @@ dependencies {
     compile 'org.codehaus.groovy:groovy:2.1.3'
     compile 'org.jenkins-ci.plugins:job-dsl-core:1.41'
     compile 'org.jenkins-ci.plugins:job-dsl:1.41'
+    compile 'org.reflections:reflections:0.9.10'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.24'
+
     compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+    compile group: 'javax.servlet', name: 'servlet-api', version: '2.5'
+
     testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude module: 'groovy-all'
     }
