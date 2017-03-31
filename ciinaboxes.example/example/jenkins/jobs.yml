@@ -3,7 +3,7 @@
 jenkins_url: http://localhost:8080/
 
 defaults:
-  scripts_dir: ciinaboxes/scripts
+  scripts_dir: ciinaboxes.example/scripts
   git:
     credentials: gitcreds
   github:

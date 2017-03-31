@@ -1,0 +1,59 @@
+jenkins_url: http://localhost:8080/
+
+jobs:
+ - name: GenericGitBuild
+   folder: dsl-doc
+   git:
+     credentials: myGitCreds                                # Credentials with 'myGitCreds' are required in Jenkins credentials store
+     url: git@github.com:myOrg/myApp.git                    # Github is used only as an example, can by any git repo
+     branch: feature/new-hot-feature                        # Branch name
+     repo_target_dir: appcode                               # Checkout in workspace sub-directory
+
+ - name: GenericGitBuildWithRefspec
+   folder: dsl-doc
+   git:
+     url: https://github.com/nodejs/readable-stream         # Public repo - credentials property is not required
+     branch: tags/v2.0.4                                    # Build specific tag
+
+ - name: ParallelJob
+   concurrentBuild: true
+
+ - name: JobWith10BuildsKept
+   folder: dsl-doc
+   discardBuilds:
+     buildsToKeep: 10                                       # Store latest 10 builds
+
+ - name: JobWith10ArtifactsKept
+   folder: dsl-doc
+   discardBuilds:
+     artifactBuildsToKeep: 10                               # Store latest 10 artifacts
+
+ - name: JobWithBuildsKept10Days
+   folder: dsl-doc
+   discardBuilds:
+     daysToKeep: 10                                         # Store builds for 10 days
+
+ - name: JobWithArtifactsKept10Days
+   folder: dsl-doc
+   discardBuilds:
+     artifactDaysToKeep: 10                                 # Store artifacts for 10 days
+
+ - name: MyLabeledJob
+   folder: dsl-doc
+   labels:
+     - MavenBuild
+
+ - name: MyJobWithParameters
+   folder: dsl-doc
+   parameters:
+     param1: value1                                        # default value is 'value1'
+     param2: ''                                            # no default value
+     deployment: true                                      # Boolean parameters have true / false value
+     deploymentEnvironment:                                # Choice parameter
+       - dev
+       - stage
+       - prod
+
+ - name: MyJobWithDescription
+   folder: dsl-doc
+   description: My Job Description
