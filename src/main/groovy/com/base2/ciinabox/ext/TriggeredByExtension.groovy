@@ -1,12 +1,13 @@
 package com.base2.ciinabox.ext
 
-import com.base2.util.MapUtil
 import javaposse.jobdsl.dsl.Job
 
 /**
  * Created by nikolatosic on 9/03/2017.
  */
-public class TriggeredByExtension implements ICiinaboxExtension {
+public class TriggeredByExtension extends ExtensionBase {
+
+  public TriggeredByExtension(){}
 
   //available opts are 'SUCCESS', 'UNSTABLE' or 'FAILURE'.
   private static final defaults = [
@@ -14,15 +15,19 @@ public class TriggeredByExtension implements ICiinaboxExtension {
   ]
 
   @Override
-  void extend(Job job, Object jobConfiguration) {
-    if (jobConfiguration.get('triggeredBy')) {
-      def triggerConfiguration = jobConfiguration.get('triggeredBy')
+  String getConfigurationKey() {
+    return 'triggeredBy'
+  }
 
-      MapUtil.extend(triggerConfiguration, defaults)
+  @Override
+  Map getDefaultConfiguration() {
+    return defaults
+  }
 
-      job.triggers {
-        upstream(triggerConfiguration.job, triggerConfiguration.treshold)
-      }
+  @Override
+  void extendDsl(Job job, def extensionConfiguration, def jobConfiguration) {
+    job.triggers {
+      upstream(extensionConfiguration.job, extensionConfiguration.treshold)
     }
   }
 }

@@ -21,7 +21,7 @@ class JobScriptsSpec extends Specification {
         }
 
         when:
-        DslScriptLoader.runDslEngine file.text, jm
+        new DslScriptLoader(jm).runScript(file.text)
 
         then:
         noExceptionThrown()
