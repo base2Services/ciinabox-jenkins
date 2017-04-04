@@ -83,3 +83,159 @@ This build could be faster, please consider using the Gradle Daemon: http://grad
 ```
 
 open http://192.168.99.100:8080/ in a browser and confirm the example job have been loaded correctly
+
+# Job DSL Reference
+
+Ciinabox Jenkins jobs are defined in yaml files. To specify yaml being used, use `-Djobfile=<filename>` switch. By default all jobs matching following path are used:
+
+`$CIINABOXES/$CIINABOX/jenkins/*.jobs.yml`
+
+Alternatively you can specify single job from yaml file using
+``-Djob=$jobname` switch. All examples from this reference file can be found in `ciinaboxes.example/example/jenkins/dsl-reference-jobs.yml` file.
+
+## Job Definition
+
+### Job name & Job Folder
+Only property required to define job is `name` property. E.G:
+
+```
+jenkins_url: http://localhost:8080/
+
+jobs:
+ - name: MyJobName
+
+ - name: MyJobName2
+   folder: MyFolder
+```
+
+Configuration above will create two jobs, respectively named MyJobName and MyJobName2 within 'MyFolder'
+
+### Description
+If you want to add description to job, you can do so via 'description' property. If not, job name is used as job description.
+
+```
+jenkins_url: http://localhost:8080/
+
+jobs:
+ - name: MyJobWithDescription
+   folder: MyFolder
+   description: My Job Description
+```
+
+### Build Parameters
+
+To specify build parameters use `parameters` property. Parameters is array of parameter names with their default values.
+
+```
+jenkins_url: http://localhost:8080/
+
+jobs:
+ - name: MyJobWithParameters
+   parameters:
+     param1: value1           # default value is 'value1'
+     param2: ''               # no default value
+     deployment: true         # Boolean parameters have true / false value
+     deploymentEnvironment:   # Choice parameter
+       - dev
+       - stage
+       - prod
+```
+
+### Labels
+
+To restrict on which node specific job can be executed, use `labels` job property
+
+```
+jenkins_url: http://localhost:8080/
+
+jobs:
+ - name: MyLabeledJob
+   labels:
+     - MavenBuild
+```
+
+### Discarding old builds
+
+You can define rotation of job data, either by giving number of days to keep builds (artifacts) or number of builds (artifacts) to keep
+
+```
+jenkins_url: http://localhost:8080/
+
+jobs:
+ - name: JobWith10BuildsKept
+   folder: RotationExample
+   discardBuilds:
+     buildsToKeep: 10        # Store latest 10 builds
+
+ - name: JobWith10ArtifactsKept
+   folder: RotationExample
+   discardBuilds:
+     artifactBuildsToKeep: 10   #Store latest 10 artifacts
+
+ - name: JobWithBuildsKept10Days
+   folder: RotationExample
+   discardBuilds:
+     daysToKeep: 10           # Store builds for 10 days
+
+ - name: JobWithArtifactsKept10Days
+   folder: RotationExample
+   discardBuilds:
+     artifactDaysToKeep: 10           # Store artifacts for 10 days
+```
+
+### Parallel builds
+
+To allow multiple builds of your job running in parallel, use `concurrentBuild` job property
+
+```
+jenkins_url: http://localhost:8080/
+
+jobs:
+ - name: ParallelJob
+   concurrentBuild: true
+```
+
+## Source Code Repository
+
+### Git SCM
+
+In order to use any Git repository accessible via Jenkins as code repo, `git` property is available
+
+```
+jenkins_url: http://localhost:8080/
+
+jobs:
+ - name: GenericGitBuild
+   git:
+     credentials: myGitCreds                                # Credentials with 'myGitCreds' are required in Jenkins credentials store
+     url: git@github.com:myOrg/myApp.git                    # Github is used only as an example, can by any git repo
+     branch: feature/new-hot-feature                        # Branch name
+     repo_target_dir: appcode                               # Checkout in workspace sub-directory
+
+ - name: GenericGitBuildWithRefspec
+   git:
+     url: https://github.com/nodejs/readable-stream         # Public repo - credentials property is not required
+     branch: tags/v2.0.4                                    # Build specific tag
+```
+
+### Github Repository
+
+### Github Pull Request Builder
+
+### Bitbucket Repository
+
+### Build Triggers
+
+### Cron
+
+To trigger builds using cron expression, use `cron` property
+
+```
+job: MyFolder/MyCronJob
+cronTrigger: */5 * * * *   ## Runs every 5 minutes
+```
+
+### Build Environment
+
+
+### Build Steps
