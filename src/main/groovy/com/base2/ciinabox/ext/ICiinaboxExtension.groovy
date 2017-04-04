@@ -7,6 +7,8 @@ import javaposse.jobdsl.dsl.Job
  */
 public interface ICiinaboxExtension {
 
-    void extend(Job job, def jobConfiguration)
+    void setJobConfiguration(jobConfiguration)
+
+    void extend(Job job)
 
 }

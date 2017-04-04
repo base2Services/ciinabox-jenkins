@@ -1,5 +1,6 @@
 package com.base2.ciinabox
 
+import com.base2.ciinabox.ext.ExtensionBase
 import com.base2.ciinabox.ext.ICiinaboxExtension
 import com.base2.util.ReflectionUtils
 
@@ -23,10 +24,12 @@ class JobHelper {
     gitPush(job, vars.get('push',[]))
 
 
-    ReflectionUtils.getTypesImplementingInterface(ICiinaboxExtension,'com.base2.ciinabox.ext').each { clazz ->
-      (clazz.newInstance() as ICiinaboxExtension).extend(job, vars)
+    ReflectionUtils.getTypesImplementingInterface(ExtensionBase,'com.base2.ciinabox.ext').
+            each { Class<? extends ExtensionBase> clazz ->
+      def extesnion = clazz.newInstance()
+      extesnion.setJobConfiguration(vars)
+      extesnion.extend(job)
     }
-
   }
 
   static void labels(def job, def labels) {
@@ -117,7 +120,7 @@ class JobHelper {
     def dslStep = vars.get('dsl')
     if(dslStep != null) {
       def dslSource = dslStep.get('filter','')
-      def dslFile = new File(scriptDir, dslStep.get('file'))
+      def dslFile = new File("${scriptDir}/${dslStep.get('file')}")
       if(dslFile.exists()) {
         dslSource = dslFile.text
       }
@@ -195,10 +198,13 @@ class JobHelper {
           refspec(block.get('refspec'))
         }
         branch(block.get('branch'))
-        wipeOutWorkspace()
-        if(block.containsKey('repo_target_dir')) {
-          relativeTargetDir(block.get('repo_target_dir'))
+
+        extensions {
+          if(block.containsKey('repo_target_dir')) {
+            relativeTargetDirectory(block.get('repo_target_dir'))
+          }
         }
+
         configure {
             if(block.containsKey('excluded_users')) {
                 it / 'extensions' / 'hudson.plugins.git.extensions.impl.UserExclusion' {
@@ -220,23 +226,33 @@ class JobHelper {
           refspec('+refs/pull/*:refs/remotes/origin/pr/*')
         }
         branch('${sha1}')
-        if(gh.containsKey('repo_target_dir')) {
-          relativeTargetDir(gh.get('repo_target_dir'))
+        extensions {
+          if(gh.containsKey('repo_target_dir')) {
+            relativeTargetDirectory(gh.get('repo_target_dir'))
+          }
         }
       }
     }
-    job.triggers {
+
+    job.configure { Node node ->
       def hooks = gh.get('use_hooks')
       def orgs = gh.get('org_white_list')
       def pollCron = gh.get('cron')
-      def pr = pullRequest {
-        orgWhitelist(orgs)
-        cron(pollCron)
-        useGitHubHooks(hooks)
-        triggerPhrase(gh.get('trigger_phrase',"ok to merge"))
-        permitAll()
-        autoCloseFailedPullRequests(false)
-        allowMembersOfWhitelistedOrgsAsAdmin()
+      if(node.get('triggers')==null){
+        node.appendNode('triggers')
+      }
+      node / 'triggers' {
+        'org.jenkinsci.plugins.ghprb.GhprbTrigger' {
+            delegate.current.attributes = ['plugin':'ghprb']
+            orgslist orgs
+            cron pollCron
+            spec pollCron
+            useGitHubHooks hooks
+            triggerPhrase gh.get(trigger_phrase,"ok to merge")
+            permitAll true
+            autoCloseFailedPullRequests false
+            allowMembersOfWhitelistedOrgsAsAdmin true
+        }
       }
     }
   }
@@ -252,9 +268,11 @@ class JobHelper {
           github(repo, block.get('protocol'), block.get('host'))
         }
         branch(buildBranch)
-        wipeOutWorkspace()
-        if(block.containsKey('repo_target_dir')) {
-          relativeTargetDir(block.get('repo_target_dir'))
+        extensions {
+          wipeOutWorkspace()
+          if(block.containsKey('repo_target_dir')) {
+            relativeTargetDirectory(block.get('repo_target_dir'))
+          }
         }
       }
     }
@@ -280,9 +298,11 @@ class JobHelper {
           url("${protocol}${block.get('repo')}.git")
         }
         branch(block.get('branch'))
-        wipeOutWorkspace()
-        if(block.containsKey('repo_target_dir')) {
-          relativeTargetDir(block.get('repo_target_dir'))
+        extensions {
+          wipeOutWorkspace()
+          if(block.containsKey('repo_target_dir')) {
+            relativeTargetDirectory(block.get('repo_target_dir'))
+          }
         }
       }
     }
@@ -424,14 +444,18 @@ class JobHelper {
       chucknorris()
     }
     if(slackChannel) {
-      job.publishers {
-        slackNotifications {
-          projectChannel(slackChannel)
-          notifyBuildStart()
-          notifySuccess()
-          notifyFailure()
-          notifyBackToNormal()
-        }
+      job.configure { node ->
+            node / 'publishers' {
+                'jenkins.plugins.slack.SlackNotifier' {
+                  delegate.current.attributes = [plugin: 'slack']
+                  room slackChannel
+                  startNotification true
+                  notifyFailure true
+                  notifySuccess true
+                  notifyAborted true
+                  notifyBackToNormal true
+                }
+            }
       }
     }
   }
