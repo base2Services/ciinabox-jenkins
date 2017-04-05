@@ -1,5 +1,14 @@
 jenkins_url: http://localhost:8080/
 
+defaults:
+  github:
+    protocol: ssh                                           # SSH or HTTP
+    credentials: my-gh-creds                                # Not required for public repos, this should
+                                                            # be ID of Jenkins credentials
+                                                            # https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin
+  bitbucket:
+    credentials: my-bb-creds                               # Credentials to use for authorization with BitBucket
+
 jobs:
  - name: GenericGitBuild
    folder: dsl-doc
@@ -57,3 +66,21 @@ jobs:
  - name: MyJobWithDescription
    folder: dsl-doc
    description: My Job Description
+
+ - name: CiinaboxGithub
+   folder: dsl-doc
+   repo: base2Services/ciinabox                             # GitHub repo, with owner
+   branch: master                                           # Branch to build
+
+ - name: CiinaboxGithub-PullRequest
+   folder: dsl-doc
+   repo: base2Services/ciinabox                             # GitHub repo, with owner
+
+ - name: BitbucketJob
+   folder: dsl-doc
+   bitbucket:
+     push: true                                             # Trigger build upon BB push
+     cron: "* * * * *"                                      # Poll SCM for changes
+     repo: nlstevenen/java-experimenting-with-java-8-features # BB repo to pull sources from
+     branch: master                                         # Which branch to build
+     repo_target_dir: app_code                              # Checkout in workspace sub-folder
