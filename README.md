@@ -244,9 +244,74 @@ jobs:
 
 ### Github Repository
 
+Ciinabox Jenkins utility makes it easy to work with Github:
+
+```
+jenkins_url: http://localhost:8080/
+
+# Defaults section applies to all jobs being provisioned in single run
+defaults:
+  github:
+    protocol: ssh                                           # SSH or HTTP
+    credentials: my-gh-creds                                # Not required for public repos, this should
+                                                            # be ID of Jenkins credentials
+                                                            # https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin
+jobs:
+ - name: CiinaboxGithub
+   folder: dsl-doc
+   repo: base2Services/ciinabox                             # GitHub repo, with owner
+   branch: master                                           # Branch to build
+   
+   
+```
+
+Depending on type of protocol being used, you may want to specify
+either a private key or username/password key when creating credentials (`my-gh-creds`) in example above
+
 ### Github Pull Request Builder
 
+If you want your project build on opened PR on Github, just omit `branch` part in above's configuration
+and your job will be triggered upon pull request with Github Pull Request Builder plugin
+All of regular commands(comments) on PR should work if your Jenkins installation is setup properly for GitHub
+web hooks. More info can be found on [plugin's page](https://github.com/jenkinsci/ghprb-plugin)
+
+```
+jenkins_url: http://localhost:8080/
+
+# Defaults section applies to all jobs being provisioned in single run
+defaults:
+  github:
+    protocol: ssh                                           # SSH or HTTP
+    credentials: my-gh-creds                                # Not required for public repos, this should
+                                                            # be ID of Jenkins credentials
+                                                            # https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin
+
+jobs:
+ - name: CiinaboxGithub-PullRequest
+   folder: dsl-doc
+   repo: base2Services/ciinabox                             # GitHub repo, with owner
+```
+
 ### Bitbucket Repository
+
+For triggering bitbucket builds, you can either poll the SCM, or 
+start the build via webhook. Both approaches can be seen in example
+below
+
+```
+jenkins_url: http://localhost:8080/
+
+ - name: BitbucketJob
+   folder: dsl-doc
+   bitbucket:
+     push: true                                             # Trigger build upon BB push
+     cron: "* * * * *"                                      # Poll SCM for changes
+     repo: nlstevenen/java-experimenting-with-java-8-features # BB repo to pull sources from
+     branch: master                                         # Which branch to build
+     repo_target_dir: app_code                              # Checkout in workspace sub-folder
+     credentials: my-bb-creds                               # Credentials to use for authorization with BitBucket
+```
+
 
 ### Build Triggers
 
