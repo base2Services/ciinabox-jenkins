@@ -54,6 +54,23 @@ jobs:
        - stage
        - prod
 
+ - name: MyJobWithParametersDefinedAsMap
+   folder: dsl-doc
+   parameters:                                            # Define parameters as map of maps
+     param1:                                              # Parameter name will be uppercased
+       default: true                                      # Default value
+       description: 'Deploy artifact?'                    # Parameter description
+
+     param2:
+       description: 'If no default value provided, empty string shall be used'
+
+     choice_param:
+       options:                                           # Define options for choice parameter
+        - option1
+        - option2
+        - option3
+       description: 'Use dropdown form to select value for CHOICE_PARAM'
+
  - name: MyJobWithDescription
    folder: dsl-doc
    description: My Job Description
