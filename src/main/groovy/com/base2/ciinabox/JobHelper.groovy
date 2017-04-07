@@ -2,6 +2,7 @@ package com.base2.ciinabox
 
 import com.base2.ciinabox.ext.ICiinaboxExtension
 import com.base2.util.ReflectionUtils
+import com.sun.org.apache.xpath.internal.operations.Bool
 
 class JobHelper {
 
@@ -37,17 +38,53 @@ class JobHelper {
 
   static void parameters(def job, def params) {
     params.each { param, value ->
+      param = param.toUpperCase()
+      //case1 - param is defined by default boolean value
       if(value instanceof Boolean ) {
         job.parameters {
-          booleanParam(param.toUpperCase(),value,'')
+          booleanParam(param,value,'')
         }
-      } else if(isCollectionOrArray(value)) {
+        return
+      }
+
+      //case2 - params is defined by array of choice options
+      if(isCollectionOrArray(value)) {
         job.parameters {
-          choiceParam(param.toUpperCase(),value,'')
+          choiceParam(param,value,'')
         }
-      } else {
+        return
+      }
+
+      //case3 - param is defined by default String value
+      if(value instanceof String || value instanceof Number) {
         job.parameters {
-          stringParam(param.toUpperCase(),value.toString(),'')
+          stringParam(param,value.toString(),'')
+        }
+        return
+      }
+
+      //case4 - param is defined by map, having default value, options and/or description
+      if(value instanceof Map){
+        job.parameters {
+          def description = value['description']
+          if (!description) {
+            description = ''
+          }
+          if (value['options'] != null && isCollectionOrArray(value['options'])) {
+            choiceParam(param, value['options'], description)
+            return
+          }
+          def defaultValue = value['default']
+          if (!defaultValue) {
+            defaultValue = ''
+          }
+          if (defaultValue instanceof Boolean) {
+            booleanParam(param, defaultValue, description)
+            return
+          }
+
+          //both String and Number values will be passed in as String Jenkins params
+          stringParam(param, defaultValue.toString(), description)
         }
       }
     }

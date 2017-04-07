@@ -124,21 +124,45 @@ jobs:
 
 ### Build Parameters
 
-To specify build parameters use `parameters` property. Parameters is array of parameter names with their default values.
+To specify build parameters use `parameters` property. Parameters element is map of parameter definitions. Map key is used as parameter name, upper cased,
+while for map values there are two options
+- Default value. If true or false are specified, parameter shall be provisioned as boolean parameter, presented as checkbox on Jenkins UI
+- List of values. 
+- Map defining parameter. `default`, `options`, `description` are available keys for the map. If dropdown select is desired as parameter input,
+`options` key should be used, providing list of available options. `default` defines default value, while `description` will give pretty info 
+on parameter role and usage to Jenkins end user 
 
 ```
 jenkins_url: http://localhost:8080/
 
 jobs:
  - name: MyJobWithParameters
+   folder: dsl-doc
    parameters:
-     param1: value1           # default value is 'value1'
-     param2: ''               # no default value
-     deployment: true         # Boolean parameters have true / false value
-     deploymentEnvironment:   # Choice parameter
+     param1: value1                                        # default value is 'value1'
+     param2: ''                                            # no default value
+     deployment: true                                      # Boolean parameters have true / false value
+     deploymentEnvironment:                                # Choice parameter
        - dev
        - stage
        - prod
+
+ - name: MyJobWithParametersDefinedAsMap
+   folder: dsl-doc
+   parameters:                                            # Define parameters as map of maps
+     param1:                                              # Parameter name will be uppercased
+       default: true                                      # Default value
+       description: 'Deploy artifact?'                    # Parameter description
+
+     param2:
+       description: 'If no default value provided, empty string shall be used'
+
+     choice_param:
+       options:                                           # Define options for choice parameter
+        - option1
+        - option2
+        - option3
+       description: 'Use dropdown form to select value for CHOICE_PARAM'
 ```
 
 ### Labels
