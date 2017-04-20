@@ -1,3 +1,4 @@
+test-local.sh
 .gradle
 build/
 out/
@@ -5,3 +6,4 @@ out/
 .idea
 .DS_Store
 ciinaboxes
+gradle-app.setting
