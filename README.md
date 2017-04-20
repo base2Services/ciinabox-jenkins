@@ -1,5 +1,15 @@
 # ciinabox Jenkins
 
+## Jenkins plugin constraints
+
+Any features of these CLI depending on Jenkins plugin, or plugin version
+should be defined in `src/main/resources/plugin_limits.yml`
+
+`./gradlew jenkins` task will fail by default if constraints are not
+satisfied. To ignore failed cnstraint checks
+use `-Dignore-version-constraints=true` option when running gradle task
+
+
 ## How to test
 
 ### Requirements
