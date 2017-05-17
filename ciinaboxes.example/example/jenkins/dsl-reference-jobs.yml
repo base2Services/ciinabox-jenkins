@@ -101,3 +101,17 @@ jobs:
      repo: nlstevenen/java-experimenting-with-java-8-features # BB repo to pull sources from
      branch: master                                         # Which branch to build
      repo_target_dir: app_code                              # Checkout in workspace sub-folder
+
+ - name: SetBuildDesciption
+   folder: dsl-doc
+   repo: base2Services/ciinabox                             # GitHub repo, with owner
+   build_description: My Build ${CUSTOM_VAR}                # Sets build description
+
+ - name: SetBuildDesciptionFull
+   folder: dsl-doc
+   repo: base2Services/ciinabox                             # GitHub repo, with owner
+   build_description:
+     description: My Build ${CUSTOM_VAR}                    # Sets build description
+     descriptionForFailed: Failed ${CUSTOM_VAR}             # Sets build description on failure
+     regularExpression: Uploading[^\s]* ([^\s]*)            # Regex will be applied to each line in the build log
+     regularExpressionForFailed: Failed [^\s]* ([^\s]*)     # Regex will be applied to each line in the build log on failure
