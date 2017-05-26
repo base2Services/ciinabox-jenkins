@@ -8,6 +8,11 @@ import javaposse.jobdsl.dsl.Job
 class RemoteTriggerExtension extends ExtensionBase {
 
   @Override
+  String getDefaultConfigurationAttribute() {
+    'token'
+  }
+
+  @Override
   String getConfigurationKey() {
     'remoteTrigger'
   }

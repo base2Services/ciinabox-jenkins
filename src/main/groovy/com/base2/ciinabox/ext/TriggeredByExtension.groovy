@@ -15,6 +15,11 @@ public class TriggeredByExtension extends ExtensionBase {
   ]
 
   @Override
+  String getDefaultConfigurationAttribute() {
+    'job'
+  }
+
+  @Override
   String getConfigurationKey() {
     return 'triggeredBy'
   }

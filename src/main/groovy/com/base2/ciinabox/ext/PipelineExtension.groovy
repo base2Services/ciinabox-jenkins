@@ -10,6 +10,11 @@ class PipelineExtension extends ExtensionBase implements ICiinaboxExtension {
   public PipelineExtension(){}
 
   @Override
+  String getDefaultConfigurationAttribute() {
+    'file'
+  }
+
+  @Override
   String getConfigurationKey() {
     return 'pipeline'
   }

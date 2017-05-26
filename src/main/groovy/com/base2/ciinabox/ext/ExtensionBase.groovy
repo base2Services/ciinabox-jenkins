@@ -23,10 +23,21 @@ public abstract class ExtensionBase implements ICiinaboxExtension {
   void extend(Job job) {
     if (this.jobConfiguration.get(getConfigurationKey())) {
       def extensionConfiguration = this.jobConfiguration[getConfigurationKey()]
+      // allow simple forms for job attributes key: value
+      if (extensionConfiguration.class.isPrimitive()) {
+        extensionConfiguration = [ "${getDefaultConfigurationAttribute()}": extensionConfiguration ]
+      }
       MapUtil.extend(extensionConfiguration, getDefaultConfiguration())
       extendDsl(job, extensionConfiguration, this.jobConfiguration)
     }
   }
+
+  /**
+   * If feature is defined in key: value form, rather than key:map form
+   * this will automatically be expaneded into key: [ defaultConfigKey: value ]
+   * @return
+   */
+  abstract String getDefaultConfigurationAttribute()
 
   /**
    * Key identifying extension
