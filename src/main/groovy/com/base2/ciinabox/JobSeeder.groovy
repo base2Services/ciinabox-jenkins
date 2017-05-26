@@ -76,7 +76,7 @@ def checkPluginVersions(config){
     if (pluginData.containsKey(plugin)){
       def actualVersion = pluginData[plugin].version
       limits.each { limit ->
-        println "Validating plugin version ${actualVersion} against constraint ${limit.op} ${limit.limit} ... "
+        println "Validating plugin ${plugin} version ${actualVersion} against constraint ${limit.op} ${limit.limit} ... "
         if(VersionUtil.verifyVersionConstraint(actualVersion,limit)){
           println " [SUCCESS] "
         } else {
@@ -90,7 +90,7 @@ def checkPluginVersions(config){
         }
       }
     } else {
-      println "Plugin $plugin not found on remote server, skipping constraint validation"
+      println "Plugin ${plugin} not found on remote server, skipping constraint validation"
     }
   }
 }
