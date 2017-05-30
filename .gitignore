@@ -6,4 +6,6 @@ out/
 .idea
 .DS_Store
 ciinaboxes
+/test-local.sh
 gradle-app.setting
+

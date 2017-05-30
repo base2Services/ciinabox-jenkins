@@ -123,7 +123,7 @@ def manageJobs(def baseDir, def username, def password, def objJobFile) {
       job.put('config', [:])
     }
 
-    if (job.containsKey('type') && job.get('type') != 'default') {
+    if (job.containsKey('type') && job.get('type') != 'default' && (!job.containsKey('name'))) {
       jobName = job.get("name", "${job['repo'].split('/')[1]}-${job['type'].split('/')[1]}")
     }
     else if (job.containsKey('name')) {
@@ -142,6 +142,9 @@ def manageJobs(def baseDir, def username, def password, def objJobFile) {
     jm.parameters << job
     jm.parameters['jobName'] = jobName
     jm.parameters['jobNames'] = jobNames
-    DslScriptLoader.runDslEngine(jobTemplate, jm)
+
+    def dslScriptLoader = new DslScriptLoader(jm)
+    dslScriptLoader.runScript(jobTemplate)
+
   }
 }
