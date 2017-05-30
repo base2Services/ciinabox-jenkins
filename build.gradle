@@ -36,6 +36,9 @@ dependencies {
     // for the RestApiScriptRunner and XmlOutputRunner
     compile('ant:ant:1.7.0')
 
+    // for evaluating plugin version constraints
+    compile group: 'com.udojava', name: 'EvalEx', version: '1.0'
+    
     compile 'org.yaml:snakeyaml:1.14'
 }
 

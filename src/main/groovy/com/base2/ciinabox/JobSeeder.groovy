@@ -1,11 +1,12 @@
 package com.base2.ciinabox
 
+import com.base2.util.*
 import com.base2.rest.RestApiJobManagement
+import com.base2.rest.RestApiPluginManagement
 import javaposse.jobdsl.dsl.DslScriptLoader
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.StringUtils
 import org.yaml.snakeyaml.Yaml
-
 import java.nio.file.Paths
 
 String ciinabox = System.getProperty('ciinabox')
@@ -15,6 +16,7 @@ String password = System.getProperty('password') // password or token
 String jobFileToProcess = System.getProperty('jobfile')
 String jobToProcess = System.getProperty('job')
 String jenkinsOverrideUrl = System.getProperty('url')
+
 
 baseDir = new File(".").absolutePath
 baseDir = baseDir.substring(0, baseDir.length() - 2)
@@ -27,6 +29,8 @@ if (!ciinabox) {
 
 def yaml = new Yaml()
 def processedJobs = false
+
+
 new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/", "*.yml").each {String jobsFile ->
 
   def matchingByJobfile =
@@ -48,7 +52,7 @@ new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jen
         (it['name'] == null) || (it['name'].equalsIgnoreCase(jobToProcess))
       }
     }
-
+    checkPluginVersions([jenkins_url: jobs.jenkins_url, username:username, password: password])
     manageJobs(baseDir, username, password, jobs)
     processedJobs = true
   }
@@ -58,16 +62,55 @@ if (!processedJobs) {
   println "no ${j} file found for ${ciinabox} found in ${ciinaboxesDir.absolutePath}/jenkins"
 }
 
+def checkPluginVersions(config){
+  String ignoreVersionConstraints = System.getProperty('ignore-version-constraints')
+  def bIgnoreVersionConstraints = (ignoreVersionConstraints != null && ignoreVersionConstraints == "true")
+  RestApiPluginManagement pluginManager = new RestApiPluginManagement(config['jenkins_url'])
+  pluginManager.setCredentials(config.username, config.password)
+
+  def pluginData = pluginManager.grabPluginMetadata(),
+      pluginLimitsLoc = this.class.getClassLoader().getResource('plugin_limits.yml').getFile()
+  pluginLimits =  new Yaml().load(new File(pluginLimitsLoc).text)
+
+  pluginLimits.each { plugin,limits ->
+    if (pluginData.containsKey(plugin)){
+      def actualVersion = pluginData[plugin].version
+      limits.each { limit ->
+        println "Validating plugin ${plugin} version ${actualVersion} against constraint ${limit.op} ${limit.limit} ... "
+        if(VersionUtil.verifyVersionConstraint(actualVersion,limit)){
+          println " [SUCCESS] "
+        } else {
+          println " [ FAILURE ]\n Plugin ${plugin} version failed to satisfy constraint ${limit.op} ${limit.limit}"
+          if(!bIgnoreVersionConstraints) {
+            println "\n use -Dignore-version-constraints=true to ignore plugin version constraints\n"
+            System.exit(-1)
+          } else {
+            println " Failed plugin dependency ignored via (ignore-version-constraints=true)"
+          }
+        }
+      }
+    } else {
+      println "Plugin ${plugin} not found on remote server, skipping constraint validation"
+    }
+  }
+}
+
+
 def manageJobs(def baseDir, def username, def password, def objJobFile) {
 
   RestApiJobManagement jm = new RestApiJobManagement(objJobFile['jenkins_url'])
+
   if (username && password) {
-    jm.setCredentials username, password
+    [jm].each { it.setCredentials(username, password)}
   }
+
+
+
   def jobNames = []
-  objJobFile['jobs'].each {job ->
+  objJobFile['jobs'].each { job ->
     jobNames << job.get('folder', '') + '/' + job.get('name')
   }
+
   objJobFile['jobs'].each {job ->
     jm.parameters.clear()
     jm.parameters['baseDir'] = baseDir
