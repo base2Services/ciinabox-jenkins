@@ -17,6 +17,12 @@ public abstract class ExtensionBase implements ICiinaboxExtension {
   @Override
   void setJobConfiguration(def jobConfiguration) {
     this.jobConfiguration = jobConfiguration
+
+    //pick up defaults section from job file
+    if(this.jobConfiguration.containsKey('defaults')){
+      MapUtil.extend(this.jobConfiguration, this.jobConfiguration.defaults)
+    }
+    this.jobConfiguration.remove('defaults')
   }
 
   @Override

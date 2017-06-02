@@ -317,13 +317,26 @@ jenkins_url: http://localhost:8080/
      push: true                                             # Trigger build upon BB push
      cron: "* * * * *"                                      # Poll SCM for changes
      repo: nlstevenen/java-experimenting-with-java-8-features # BB repo to pull sources from
-     branch: master                                         # Which branch to build
+     branch: master                                         # Which branch to build if omitted pull request builder is configured
      repo_target_dir: app_code                              # Checkout in workspace sub-folder
      credentials: my-bb-creds                               # Credentials to use for authorization with BitBucket
+     pr_cron : "* * * * *"                                  # Pull request builder, defaults to every minute
+     commentTrigger : "test this please"                    # Pull request builder re-test comment, defaults to 'retest this please'
+     ciKey          : "jenkins"                             # CI Key for pull request builder, defaults to 'jenkins'
+     ciName         : "Jenkins"                             # CI name for pull request builder, defaults to 'Jenkins'
+     approveIfSuccess: true                                 # for pull request builder, defaults to true
+     cancelOutdatedJobs: false                              # for pull request builder, defaults to false
+     checkDestinationCommit: false                          # for pull request builder, defaults to false
+     
 ```
 
 
 ### Build Triggers
+
+### Bitbucket pull request builder
+
+If you want job to build bitbucket pull requests, just configure `bitbucket` block
+without `branch` key
 
 ### Cron
 

@@ -96,8 +96,6 @@ class JobHelper {
   static void scm(def job, def vars) {
     if(vars.containsKey('git')) {
       gitSCM(job, vars.get('git'), vars)
-    } else if(vars.containsKey('bitbucket')) {
-      bitbucket(job, vars.get('bitbucket'), vars)
     } else if(vars.containsKey('branch')) {
       githubScm(job, vars.get('github',[:]), vars)
     } else if(vars.containsKey('repo')){
@@ -315,35 +313,6 @@ class JobHelper {
     }
   }
 
-  static void bitbucket(def job, def scmConf, def vars) {
-    def block = mergeWithDefaults(scmConf, vars, 'bitbucket')
-    def protocol = (block.get('protocol') == 'ssh' ? 'git@bitbucket.org:' : 'https://bitbucket.org/' )
-    if(block.get('push',false)) {
-      job.triggers{
-        bitbucketPush()
-      }
-    }
-    if(block.containsKey('cron')) {
-      job.triggers {
-        scm(block.get('cron'))
-      }
-    }
-    job.scm {
-      git {
-        remote {
-          credentials(block.get('credentials'))
-          url("${protocol}${block.get('repo')}.git")
-        }
-        branch(block.get('branch'))
-        extensions {
-          wipeOutWorkspace()
-          if(block.containsKey('repo_target_dir')) {
-            relativeTargetDirectory(block.get('repo_target_dir'))
-          }
-        }
-      }
-    }
-  }
 
   static void copyLatestSuccessfulArtifacts(def job, def artifacts, def jobNames = []) {
     artifacts.each { artifact ->
