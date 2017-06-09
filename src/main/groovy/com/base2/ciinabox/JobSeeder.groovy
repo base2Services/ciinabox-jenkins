@@ -41,7 +41,7 @@ new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jen
 
   if (jobFileToProcess == null || matchingByJobfile) {
     def jobs = (Map) yaml.load(new File(jobsFile).text)
-    println "\nLoading jobs from file: $jobsFile"
+
     if (jenkinsOverrideUrl != null) {
       jobs['jenkins_url'] = jenkinsOverrideUrl
     }
@@ -51,7 +51,11 @@ new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jen
       jobs['jobs'] = jobs['jobs'].findAll {
         (it['name'] == null) || (it['name'].equalsIgnoreCase(jobToProcess))
       }
+      if(jobs['jobs'].size() == 0){
+        return
+      }
     }
+    println "\nLoading jobs from file: $jobsFile"
     checkPluginVersions([jenkins_url: jobs.jenkins_url, username:username, password: password])
     manageJobs(baseDir, username, password, jobs)
     processedJobs = true
