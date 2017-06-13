@@ -3,6 +3,7 @@ package com.base2.ciinabox
 import com.base2.util.*
 import com.base2.rest.RestApiJobManagement
 import com.base2.rest.RestApiPluginManagement
+import javaposse.jobdsl.dsl.AbstractJobManagement
 import javaposse.jobdsl.dsl.DslScriptLoader
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.StringUtils
@@ -98,7 +99,14 @@ def checkPluginVersions(config){
 
 def manageJobs(def baseDir, def username, def password, def objJobFile) {
 
-  RestApiJobManagement jm = new RestApiJobManagement(objJobFile['jenkins_url'])
+  AbstractJobManagement jm
+  String remoteUrl = objJobFile['jenkins_url']
+  //override job management clazz if instructed so
+  if(StringUtils.isBlank(System.getProperty('jobManagementClass'))) {
+     jm = new RestApiJobManagement(remoteUrl)
+  } else {
+     jm = Class.forName(System.getProperty('jobManagementClass')).newInstance(remoteUrl)
+  }
 
   if (username && password) {
     [jm].each { it.setCredentials(username, password)}
@@ -137,7 +145,7 @@ def manageJobs(def baseDir, def username, def password, def objJobFile) {
       job['folder'] = ''
     }
 
-    println "\nprocessing job: $jobName"
+    println "\nprocessing job: ${job['folder']}/${jobName}"
 
     jm.parameters << job
     jm.parameters['jobName'] = jobName

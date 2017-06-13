@@ -9,6 +9,46 @@ should be defined in `src/main/resources/plugin_limits.yml`
 satisfied. To ignore failed cnstraint checks
 use `-Dignore-version-constraints=true` option when running gradle task
 
+## Comparing local scripts with remote ones 
+
+` ./gradlew jobsScriptCompare ` task will download all scripts specified
+as execute script step on configured jenkins jobs. Report on script diff is printed to standard output.
+`jobsScriptCompare` task accepts same switches as `jenkins` task
+
+`-Dusername=jenkinsuser`
+
+`-Djob=jobToPublishOrCompare`
+
+`-Djobfile=jobFileToPublishOrCompare`
+
+`-Durl=http://override.jenkins.url`
+
+`-Dignore-version-constraints=true`
+
+output example:
+
+```
+
+processing job: Backup-EBS-Production
+Processing provided DSL script
+Script #0 identical on remote and local dsl 
+Script #1 identical on remote and local dsl 
+
+
+processing job: Backup-RDS-Production
+Processing provided DSL script
+Difference in script #0 in DSL and on remote. 
+
+
+------
+Local  L#  36:|
+ #   TODO: check whatever we are in backup window for DB instance. If so, automated backup to copy from may not be available and user should be notified
+Remote L#  36:|
+ 
+------
+
+```
+
 
 ## How to test
 
