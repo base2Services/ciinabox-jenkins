@@ -311,6 +311,11 @@ class JobHelper {
         }
       }
     }
+    if(block.get('push',false)) {
+      job.triggers{
+        githubPush()
+      }
+    }
   }
 
 
