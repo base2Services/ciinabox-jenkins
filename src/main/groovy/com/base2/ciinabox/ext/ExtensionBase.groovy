@@ -30,7 +30,7 @@ public abstract class ExtensionBase implements ICiinaboxExtension {
     if (this.jobConfiguration.get(getConfigurationKey())) {
       def extensionConfiguration = this.jobConfiguration[getConfigurationKey()]
       // allow simple forms for job attributes key: value
-      if (extensionConfiguration.getClass().isPrimitive()) {
+      if (extensionConfiguration.getClass().isPrimitive() || extensionConfiguration instanceof String) {
         extensionConfiguration = [ "${getDefaultConfigurationAttribute()}": extensionConfiguration ]
       }
       MapUtil.extend(extensionConfiguration, getDefaultConfiguration())

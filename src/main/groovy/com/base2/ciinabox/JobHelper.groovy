@@ -273,6 +273,9 @@ class JobHelper {
       def hooks = gh.get('use_hooks')
       def orgs = gh.get('org_white_list')
       def pollCron = gh.get('cron')
+      if(pollCron == null){
+        pollCron = '* * * * *'
+      }
       if(node.get('triggers')==null){
         node.appendNode('triggers')
       }
@@ -328,6 +331,12 @@ class JobHelper {
           matchingJobs.each { jobName ->
             copyArtifacts(jobName) {
               includePatterns(artifact.get('file_pattern'))
+              if(artifact.get('exclude_file_pattern')) {
+                excludePatterns(artifact.get('exclude_file_pattern'))
+              }
+              if(artifact.get('optional')){
+                optional()
+              }
               targetDirectory(artifact.get('target_directory',''))
               flatten()
               fingerprintArtifacts()
@@ -343,6 +352,12 @@ class JobHelper {
         } else {
           copyArtifacts(artifact.get('job')) {
             includePatterns(artifact.get('file_pattern'))
+            if(artifact.get('exclude_file_pattern')) {
+              excludePatterns(artifact.get('exclude_file_pattern'))
+            }
+            if(artifact.get('optional')){
+              optional()
+            }
             targetDirectory(artifact.get('target_directory',''))
             flatten()
             fingerprintArtifacts()

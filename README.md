@@ -269,6 +269,13 @@ jobs:
    concurrentBuild: true
 ```
 
+## Copy artifacts from other jobs
+
+```yaml
+
+
+```
+
 ## Source Code Repository
 
 ### Git SCM

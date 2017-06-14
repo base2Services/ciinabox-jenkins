@@ -36,6 +36,12 @@ class BitbucketExtension extends ExtensionBase {
   @Override
   void extendDsl(Job job, Object extensionConfiguration, Object jobConfiguration) {
     //detect whether is regular or pr job
+    if(extensionConfiguration.repo == null){
+      println "No bitbucket repo defined for ${jobConfiguration.name} - " +
+              "Probably bitbucket defaults defined but no bitbucket definition for job itself"
+      return
+    }
+
     def hasBranch = extensionConfiguration.containsKey('branch') && StringUtils.isNotBlank(extensionConfiguration.branch),
         repoParts = extensionConfiguration.repo.split('/')
     if (repoParts.size() != 2) {

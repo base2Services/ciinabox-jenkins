@@ -31,8 +31,9 @@ if (!ciinabox) {
 def yaml = new Yaml()
 def processedJobs = false
 
+def allYamlFileNames = new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/", "*.yml")
 
-new FileNameFinder().getFileNames("${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins/", "*.yml").each {String jobsFile ->
+allYamlFileNames.each {String jobsFile ->
 
   def matchingByJobfile =
           jobFileToProcess != null &&
