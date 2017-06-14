@@ -378,6 +378,65 @@ jenkins_url: http://localhost:8080/
 ```
 
 
+### Storing and retrieving artifacts
+
+For storing artifacts use `archive` key, which aceepts wildcards. For retrieving artifacts stored in other jobs use
+`artifacts` key. You can specify jobs either with wildcard filter, or by specifying every one of them. In case of using
+wildcard, `-Djob=$jobName` switch won't work as expected, as all dependant jobs need to be published in same batch. 
+
+```yaml
+
+ - name: JobToCopyArtifactFrom1
+   folder: dsl-doc
+   shell:                                                  # Execute shell script as build step
+    - script: "echo 'test' > resultsjob1.txt"             # Add some text to txt file
+   archive:
+    - resultsjob1.txt                                     # Archive text file as result
+
+ - name: JobToCopyArtifactFrom2
+   folder: dsl-doc
+   shell:                                                  # Execute shell script as build step
+    - script: "echo 'test' > resultsjob2.txt"             # Add some text to txt file
+   archive:
+    - resultsjob2.txt                                     # Archive text file as result
+
+ - name: JobToCopyArtifactFrom3
+   folder: dsl-doc
+   shell:                                                  # Execute shell script as build step
+    - script: "echo 'test' > resultsjob3.txt"             # Add some text to txt file
+    - script: "echo 'test' > resultsjob3extended.txt"             # Add some text to txt file
+   archive:
+#    - resultsjob3.txt                                     # Archive text file as result
+    - resultsjob3extended.txt
+
+ - name: JobToCopyArtifactsToWildstar
+   folder: dsl-doc
+   artifacts:
+    - job: JobToCopyArtifactFrom*                         # You can use wildcard '*' when specifying job,
+                                                          # though you'll need to publish all jobs in single Jenkins Run when using wildcard
+                                                          # as wildcard matching is done on client side, and is not part of Jenkins plugin
+      file_pattern: "results*.txt"                        # files to include, filter is applied to stored artifacts from matched jobs
+      exclude_file_pattern: resultsjob1.txt               # files to exclude, filter is applied to stored artifacts from matched jobs
+      optional: true                                      # job won't fail if artifacts is nowhere to be found
+   shell:
+    - script: "ls -la results*"
+
+ - name: JobToCopyArtifactsToArray                        # This job will fail, as we have excluded results1.txt, and there are no artifacts
+                                                          # to copy from. This can be overriden by specifying optional: true
+   folder: dsl-doc
+   artifacts:
+    - job: JobToCopyArtifactFrom1                         # You can specify multiple jobs as an array in artifacts key
+      file_pattern: "results*.txt"                        # files to include, filter is applied to stored artifacts from job key
+      exclude_file_pattern: resultsjob1.txt               # files to exclude, filter is applied to stored artifacts from job key
+
+    - job: JobToCopyArtifactFrom2
+      file_pattern: "results*.txt"
+
+   shell:
+    - script: "ls -la results*"
+    
+```
+
 ### Build Triggers
 
 ### Bitbucket pull request builder
