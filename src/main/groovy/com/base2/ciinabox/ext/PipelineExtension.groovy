@@ -26,7 +26,7 @@ class PipelineExtension extends ExtensionBase implements ICiinaboxExtension {
 
   @Override
   void extendDsl(Job job, def extensionConfiguration, def jobConfiguration) {
-    def scriptLocation = "${defaultConfigValue('scripts_dir','ciinaboxes')}/${extensionConfiguration.file}",
+    def scriptLocation = "${jobConfiguration.scripts_dir}/${extensionConfiguration.file}",
         scriptContent = new File(scriptLocation).text
 
     job.definition {
