@@ -42,6 +42,11 @@ class BitbucketExtension extends ExtensionBase {
       return
     }
 
+    if(extensionConfiguration instanceof List){
+      handleBitbucketMultipleScm(job, extensionConfiguration)
+      return
+    }
+
     def hasBranch = extensionConfiguration.containsKey('branch') && StringUtils.isNotBlank(extensionConfiguration.branch),
         repoParts = extensionConfiguration.repo.split('/')
     if (repoParts.size() != 2) {
@@ -105,6 +110,29 @@ class BitbucketExtension extends ExtensionBase {
             checkDestinationCommit extensionConfiguration.checkDestinationCommit
             commentTrigger extensionConfiguration.commentTrigger
           }
+        }
+      }
+    }
+  }
+
+  private handleBitbucketMultipleScm(Job job, extensionConfiguration) {
+    job.multiscm {
+      for (int i = 0; i < extensionConfiguration.size(); i++) {
+        def config = extensionConfiguration[i]
+        def protocol = (config.protocol == 'ssh' ? 'git@bitbucket.org:' : 'https://bitbucket.org/')
+        def hasBranch = config.containsKey('branch') && StringUtils.isNotBlank(config.branch)
+        git {
+          remote {
+            credentials(config.credentials)
+            url("${protocol}${config.repo}.git")
+          }
+          extensions {
+            wipeOutWorkspace()
+            if (config.containsKey('repo_target_dir')) {
+              relativeTargetDirectory(config.get('repo_target_dir'))
+            }
+          }
+          branch(hasBranch ? config.branch : "*/\${sourceBranch}")
         }
       }
     }
