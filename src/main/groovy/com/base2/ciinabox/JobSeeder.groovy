@@ -131,6 +131,7 @@ def manageJobs(def baseDir, def username, def password, def objJobFile) {
     if (objJobFile['defaults']) {
       jm.parameters['defaults'] = objJobFile['defaults']
     }
+    job.each { k, v -> if (k == 'pipeline') job['type'] = 'pipeline' }
     jobTemplate = new File("$baseDir/jobs/${job.get('type', 'default')}.groovy").text
     if (!job.containsKey('config')) {
       job.put('config', [:])

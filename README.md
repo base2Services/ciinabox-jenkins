@@ -377,6 +377,34 @@ jenkins_url: http://localhost:8080/
      
 ```
 
+#### Bitbucket pull request builder
+
+If you want job to triggered via bitbucket pull requests, just configure `bitbucket` block
+without `branch` key
+
+#### Multi-SCM for bitbucket
+
+With BitBucket SCM provider and  Multiple SCM plugin for Jenkins (https://wiki.jenkins-ci.org/display/JENKINS/Multiple+SCMs+Plugin)
+you can use multiple SCMs, just define `bitbucket` element as list. Multi-SCM does not support pull rquest builder
+or push web hooks as trigger, as it is non-deterministic which repo should be observed
+
+```yaml
+ - name: MultipleBitbucketSCMJob
+   folder: dsl-doc
+   bitbucket:                                              # You can define multiple SCMs for bitbucket, each checked in
+                                                           # in it's own repository
+      -
+        repo: atlassian/asap-java
+        branch: master
+        repo_target_dir: app_code
+      -
+        repo: atlassian/docker-atlassian-bitbucket-server
+        branch: master
+        repo_target_dir: containers
+   shell:
+     - script: "mkdir -p $HOME/.m2/repository && cd app_code && docker run --rm -v $PWD:/app -v $HOME/.m2:/var/maven/.m2 base2/maven install"    # Use docker to build application
+     - script: "cd containers && docker build -t atlassian/bitbucket . "                 # Build docker image
+```
 
 ### Storing and retrieving artifacts
 
@@ -439,11 +467,6 @@ wildcard, `-Djob=$jobName` switch won't work as expected, as all dependant jobs 
 
 ### Build Triggers
 
-### Bitbucket pull request builder
-
-If you want job to build bitbucket pull requests, just configure `bitbucket` block
-without `branch` key
-
 ### Cron
 
 To trigger builds using cron expression, use `cron` property
@@ -457,3 +480,19 @@ cronTrigger: */5 * * * *   ## Runs every 5 minutes
 
 
 ### Build Steps
+
+### Pipeline jobs
+
+To publish job using pipeline groovy file, just point to file within `pipeline` configuraiton key. 
+Also, file is relative to `defaults/scripts_dir` directory
+
+```yaml
+ - name: PipelineJob
+   folder: dsl-doc
+   parameters:
+     key1:
+      description: 'Demo params in a pipeline'
+      default: 'default key1 value'
+   pipeline:
+     file: pipelines/helloworld.groovy
+```

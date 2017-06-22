@@ -1,6 +1,7 @@
 jenkins_url: http://localhost:8080/
 
 defaults:
+  scripts_dir: ciinaboxes.example/example
   github:
     protocol: ssh                                           # SSH or HTTP
     credentials: my-gh-creds                                # Not required for public repos, this should
@@ -100,6 +101,22 @@ jobs:
      branch: master                                         # Which branch to build
      repo_target_dir: app_code                              # Checkout in workspace sub-folder
 
+ - name: MultipleBitbucketSCMJob
+   folder: dsl-doc
+   bitbucket:                                              # You can define multiple SCMs for bitbucket, each checked in
+                                                           # in it's own repository
+      -
+        repo: atlassian/asap-java
+        branch: master
+        repo_target_dir: app_code
+      -
+        repo: atlassian/docker-atlassian-bitbucket-server
+        branch: master
+        repo_target_dir: containers
+   shell:
+     - script: "mkdir -p $HOME/.m2/repository && cd app_code && docker run --rm -v $PWD:/app -v $HOME/.m2:/var/maven/.m2 base2/maven install"    # Use docker to build application
+     - script: "cd containers && docker build -t atlassian/bitbucket . "                 # Build docker image
+
  - name: SetBuildDesciption
    folder: dsl-doc
    repo: base2Services/ciinabox                             # GitHub repo, with owner
@@ -162,3 +179,12 @@ jobs:
 
    shell:
     - script: "ls -la results*"
+
+ - name: PipelineJob
+   folder: dsl-doc
+   parameters:
+     key1:
+      description: 'Demo params in a pipeline'
+      default: 'default key1 value'
+   pipeline:
+     file: pipelines/helloworld.groovy
