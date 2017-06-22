@@ -235,6 +235,7 @@ class JobHelper {
         branch(block.get('branch'))
 
         extensions {
+          wipeOutWorkspace()
           if(block.containsKey('repo_target_dir')) {
             relativeTargetDirectory(block.get('repo_target_dir'))
           }
