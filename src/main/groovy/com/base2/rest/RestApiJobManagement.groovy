@@ -10,6 +10,15 @@ class RestApiJobManagement extends MockJobManagement {
 
   final RESTClient restClient
 
+  private __DIRTY_MARKERS = [
+          'DONT UPDATE WITH CIINABOX',
+          'DON\'T UPDATE WITH CIINABOX',
+          'DO NOT UPDATE WITH CIINABOX',
+          'SKIP CIINABOX UPDATE',
+          'CIINABOX SKIP',
+          'CIINABOX SKIP UPDATE',
+  ]
+
   RestApiJobManagement(String baseUrl) {
     if (!baseUrl != null && !baseUrl.endsWith("/")) {
       baseUrl += "/"
@@ -44,19 +53,45 @@ class RestApiJobManagement extends MockJobManagement {
     createOrUpdateConfig(viewName, config, ignoreExisting, true)
   }
 
+  private String getJobDescription(xml){
+    try {
+      def xmlObj = new XmlSlurper().parseText(xml)
+      return xmlObj.description
+    }catch (Exception ex){
+      println "Error reading description from remote xml"
+      return ""
+    }
+  }
+
   boolean createOrUpdateConfig(String name, String xml, boolean ignoreExisting, boolean isView) throws NameNotProvidedException {
     boolean success
     String status
 
     String existingXml = fetchExistingXml(name, isView)
+    def update = {
+      success = update(name, xml, isView)
+      status = success ? 'updated' : 'update failed'
+    }
     if (existingXml) {
-      if (ignoreExisting) {
+      //check if job description is any of dirty markers
+      def jobDescription = getJobDescription(existingXml)
+      if(__DIRTY_MARKERS.contains(jobDescription.toUpperCase())){
+        def overwrite = Boolean.getBoolean('overrideDirtyJobs')
+
+        if(!overwrite){
+          success = true
+          status = " skipped due dirty marker ${jobDescription} (as job description)"
+          println("CIINABOX HINT: use -DoverrideDirtyJobs=true property to override job ${name}")
+        } else {
+          update()
+        }
+      }
+      else if (ignoreExisting) {
         success = true
         status = 'ignored'
       }
       else {
-        success = update(name, xml, isView)
-        status = success ? 'updated' : 'update failed'
+        update()
       }
     }
     else {
