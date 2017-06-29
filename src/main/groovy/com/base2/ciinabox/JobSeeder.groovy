@@ -22,6 +22,15 @@ String jenkinsOverrideUrl = System.getProperty('url')
 baseDir = new File(".").absolutePath
 baseDir = baseDir.substring(0, baseDir.length() - 2)
 ciinaboxesDir = new File(ciinaboxes)
+ciinaboxDir  = new File("${ciinaboxesDir}/${ciinabox}")
+
+//validate existance of directories
+[ciinaboxesDir,ciinaboxDir].each { dir ->
+  if (!(dir.exists() && dir.isDirectory())) {
+    System.err.println "\n${dir} is not directory!!!\n"
+    System.exit(-1)
+  }
+}
 
 if (!ciinabox) {
   println 'usage: -Dciinabox=<ciinabox_name> [-Dciinaboxes=<ciinaboxes dir>] [-Durl=<jenkins_url>] [-Dusername=<username>] [-Dpassword=<password>] [-Djobfile=myjobs.yml]'

@@ -5,10 +5,10 @@ import com.udojava.evalex.Expression;
 class VersionUtil {
 
     public static final verifyVersionConstraint(version, constraint){
-        def dotCount1 = version.toString().split('\\.').length,
-            dotCount2 = constraint.limit.toString().split('\\.').length,
-            vComponents1 = version.toString().split('\\.'),
-            vComponents2 = constraint.limit.toString().split('\\.'),
+        def dotCount1 = version.toString().replace('-','.').split('\\.').length,
+            dotCount2 = constraint.limit.toString().replace('-','.').split('\\.').length,
+            vComponents1 = version.toString().replace('-','.').split('\\.'),
+            vComponents2 = constraint.limit.toString().replace('-','.').split('\\.'),
             deg = dotCount1 > dotCount2 ? dotCount1 : dotCount2,
             v1 = 0.0, 
             v2 = 0.0
