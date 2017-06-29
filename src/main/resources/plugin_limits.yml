@@ -1,8 +1,6 @@
 slack:
   - op: ' >= '
     limit: '2.2'
-  - op: ' <= '
-    limit: '4.0' #test
 
 ghprb: 
   - op: ' >= '
