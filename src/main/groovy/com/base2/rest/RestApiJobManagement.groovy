@@ -75,7 +75,7 @@ class RestApiJobManagement extends MockJobManagement {
     if (existingXml) {
       //check if job description is any of dirty markers
       def jobDescription = getJobDescription(existingXml)
-      if(__DIRTY_MARKERS.contains(jobDescription.toUpperCase())){
+      if(__DIRTY_MARKERS.any{ jobDescription.toUpperCase().contains(it) }){
         def overwrite = Boolean.getBoolean('overrideDirtyJobs')
 
         if(!overwrite){
