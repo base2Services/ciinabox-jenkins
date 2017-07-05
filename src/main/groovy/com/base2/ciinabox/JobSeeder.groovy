@@ -51,7 +51,14 @@ allYamlFileNames.each {String jobsFile ->
 
 
   if (jobFileToProcess == null || matchingByJobfile) {
-    def jobs = (Map) yaml.load(new File(jobsFile).text)
+    def jobs
+    try {
+      jobs = (Map) yaml.load(new File(jobsFile).text)
+    } catch (Exception ex) {
+      System.err.println("[ERROR] Error loading YAML file ${jobsFile}:")
+      System.err.println(ex.toString())
+      System.exit(-2)
+    }
 
     if (jenkinsOverrideUrl != null) {
       jobs['jenkins_url'] = jenkinsOverrideUrl
