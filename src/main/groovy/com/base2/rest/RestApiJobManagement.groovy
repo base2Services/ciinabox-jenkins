@@ -99,6 +99,10 @@ class RestApiJobManagement extends MockJobManagement {
             requestContentType: 'application/xml'
     )
 
+    if(resp.status != 200){
+      System.err.println("[ERROR] Creation of job ${name} failed with HTTP status code ${resp.status}")
+    }
+
     resp.status == 200
   }
 
@@ -108,6 +112,10 @@ class RestApiJobManagement extends MockJobManagement {
             body: xml,
             requestContentType: 'application/xml'
     )
+
+    if(resp.status != 200){
+      System.err.println("[ERROR] Update for job ${name} failed with HTTP status code ${resp.status}")
+    }
 
     resp.status == 200
   }
