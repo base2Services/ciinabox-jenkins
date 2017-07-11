@@ -1,62 +1,12 @@
 # ciinabox Jenkins
 
-## Jenkins plugin constraints
+# Testing
 
-Any features of these CLI depending on Jenkins plugin, or plugin version
-should be defined in `src/main/resources/plugin_limits.yml`
-
-`./gradlew jenkins` task will fail by default if constraints are not
-satisfied. To ignore failed cnstraint checks
-use `-Dignore-version-constraints=true` option when running gradle task
-
-## Comparing local scripts with remote ones 
-
-` ./gradlew jobsScriptCompare ` task will download all scripts specified
-as execute script step on configured jenkins jobs. Report on script diff is printed to standard output.
-`jobsScriptCompare` task accepts same switches as `jenkins` task
-
-`-Dusername=jenkinsuser`
-
-`-Djob=jobToPublishOrCompare`
-
-`-Djobfile=jobFileToPublishOrCompare`
-
-`-Durl=http://override.jenkins.url`
-
-`-Dignore-version-constraints=true`
-
-output example:
-
-```
-
-processing job: Backup-EBS-Production
-Processing provided DSL script
-Script #0 identical on remote and local dsl 
-Script #1 identical on remote and local dsl 
-
-
-processing job: Backup-RDS-Production
-Processing provided DSL script
-Difference in script #0 in DSL and on remote. 
-
-
-------
-Local  L#  36:|
- #   TODO: check whatever we are in backup window for DB instance. If so, automated backup to copy from may not be available and user should be notified
-Remote L#  36:|
- 
-------
-
-```
-
-
-## How to test
-
-### Requirements
+## Requirements
  - Install the Docker Toolbox https://www.docker.com/docker-toolbox
  - Java 8 SDK
 
-### Docker Setup
+## Docker run ciinabox jenkins server 
 create a ciinabox docker machine
 
 ```sh
@@ -77,7 +27,7 @@ Creating ciinaboxjenkins_jenkins-docker-slave_1
 Creating ciinaboxjenkins_jenkins_1
 ```
 
-### Running the example ciinabox Jenkins configuration
+## Running the example ciinabox Jenkins configuration
 
 Create a symlink to your ciinaboxes directory for example
 
@@ -133,6 +83,146 @@ This build could be faster, please consider using the Gradle Daemon: http://grad
 ```
 
 open http://192.168.99.100:8080/ in a browser and confirm the example job have been loaded correctly
+
+# Command line options and CLI behaviour
+
+## Specify job file or job to be published
+
+By default all jobs are published. 
+
+If you want to specify single job, use `-Djob=$jobname`
+
+If you want to specify single job file, use `-Djobfile=$jobfile[.yml]`
+
+## Lock manually updated jobs, and override them forcibly
+
+If you want ciinabox-jenkins utility to skip some of the jobs you may have manually
+updated on remote Jenkins server (but haven't updated DSL), you can mark this job as "dirty"
+by setting any of following scripts as job description
+
+- DONT UPDATE WITH CIINABOX
+- DON'T UPDATE WITH CIINABOX
+- DO NOT UPDATE WITH CIINABOX
+- SKIP CIINABOX UPDATE
+- CIINABOX SKIP
+- CIINABOX SKIP UPDATE
+
+Dirty check is performed in case-insensitive style meaning that e.g. 'ciinabox skip' will 
+mark job as dirty just as good as 'CIINABOX SKIP'
+
+However, if you want to override this behaviour of `ciinabox-jenkins` utility, you may do so
+by passing system property `-DoverrideDirtyJobs=true` to gradle task
+
+
+**example 1 - With dirty job skipped**
+
+```text
+
+$ ./gradlew jenkins -Dusername=ciinabox -Dciinabox=example -Dciinaboxes=ciinaboxes.example -Durl=http://localhost:8080 -Djob=MultipleBitbucketSCMJob -Dpassword=ciinabox
+:compileJava UP-TO-DATE
+:compileGroovy UP-TO-DATE
+:processResources UP-TO-DATE
+:classes UP-TO-DATE
+:jenkins
+
+Loading jobs from file: /Users/username/ciinabox-jenkins/ciinaboxes.example/example/jenkins/dsl-reference-jobs.yml
+using jenkins url: http://localhost:8080/
+Validating plugin slack version 2.2 against constraint  >=  2.2 ... 
+ [SUCCESS] 
+Validating plugin ghprb version 1.37.0 against constraint  >=  1.33.2 ... 
+ [SUCCESS] 
+using jenkins url: http://localhost:8080/
+
+processing job: dsl-doc/MultipleBitbucketSCMJob
+Processing provided DSL script
+dsl-doc - updated
+dsl-doc/MultipleBitbucketSCMJob -  skipped due dirty marker don't update with ciinabox (as job description)
+CIINABOX HINT: use -DoverrideDirtyJobs=true property to override job dsl-doc/MultipleBitbucketSCMJob
+
+
+BUILD SUCCESSFUL
+
+Total time: 7.347 secs
+```
+
+**example 2 - With dirty job overwritten**
+
+```text
+
+$ ./gradlew jenkins -Dusername=ciinabox -Dciinabox=example -Dciinaboxes=ciinaboxes.example -Durl=http://localhost:8080 -Djob=MultipleBitbucketSCMJob -Dpassword=ciinabox -DoverrideDirtyJobs=true 
+:compileJava UP-TO-DATE
+:compileGroovy UP-TO-DATE
+:processResources UP-TO-DATE
+:classes UP-TO-DATE
+:jenkins
+
+Loading jobs from file: /Users/username/ciinabox-jenkins/ciinaboxes.example/example/jenkins/dsl-reference-jobs.yml
+using jenkins url: http://localhost:8080/
+Validating plugin slack version 2.2 against constraint  >=  2.2 ... 
+ [SUCCESS] 
+Validating plugin ghprb version 1.37.0 against constraint  >=  1.33.2 ... 
+ [SUCCESS] 
+using jenkins url: http://localhost:8080/
+
+processing job: dsl-doc/MultipleBitbucketSCMJob
+Processing provided DSL script
+dsl-doc - updated
+dsl-doc/MultipleBitbucketSCMJob - updated
+
+BUILD SUCCESSFUL
+
+Total time: 7.742 secs
+
+```
+
+## Jenkins plugin constraints
+
+Any features of these CLI depending on Jenkins plugin, or plugin version
+should be defined in `src/main/resources/plugin_limits.yml`
+
+`./gradlew jenkins` task will fail by default if constraints are not
+satisfied. To ignore failed cnstraint checks
+use `-Dignore-version-constraints=true` option when running gradle task
+
+## Comparing local scripts with remote ones 
+
+` ./gradlew jobsScriptCompare ` task will download all scripts specified
+as execute script step on configured jenkins jobs. Report on script diff is printed to standard output.
+`jobsScriptCompare` task accepts same switches as `jenkins` task
+
+`-Dusername=jenkinsuser`
+
+`-Djob=jobToPublishOrCompare`
+
+`-Djobfile=jobFileToPublishOrCompare`
+
+`-Durl=http://override.jenkins.url`
+
+`-Dignore-version-constraints=true`
+
+output example:
+
+```
+
+processing job: Backup-EBS-Production
+Processing provided DSL script
+Script #0 identical on remote and local dsl 
+Script #1 identical on remote and local dsl 
+
+
+processing job: Backup-RDS-Production
+Processing provided DSL script
+Difference in script #0 in DSL and on remote. 
+
+
+------
+Local  L#  36:|
+ #   TODO: check whatever we are in backup window for DB instance. If so, automated backup to copy from may not be available and user should be notified
+Remote L#  36:|
+ 
+------
+
+```
 
 # Job DSL Reference
 
