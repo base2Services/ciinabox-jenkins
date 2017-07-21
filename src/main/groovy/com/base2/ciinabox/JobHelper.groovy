@@ -78,7 +78,7 @@ class JobHelper {
             return
           }
           def defaultValue = value['default']
-          if (!defaultValue) {
+          if (defaultValue == null) {
             defaultValue = ''
           }
           if (defaultValue instanceof Boolean) {
