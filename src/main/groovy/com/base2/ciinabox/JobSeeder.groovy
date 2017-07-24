@@ -149,7 +149,7 @@ def manageJobs(def baseDir, def username, def password, def objJobFile) {
     }
     def is_pipeline = false
     job.each { k, v ->
-      is_pipeline = (k == 'pipeline')
+      is_pipeline = is_pipeline || (k == 'pipeline')
     }
     if (is_pipeline) {
       job['type'] = 'pipeline'
