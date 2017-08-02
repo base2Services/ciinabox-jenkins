@@ -3,7 +3,7 @@ jenkins_url: http://localhost:8080/
 defaults:
   scripts_dir: ciinaboxes.example/example
   github:
-    protocol: ssh                                           # SSH or HTTP
+    protocol: https                                         # ssh or https
     credentials: my-gh-creds                                # Not required for public repos, this should
                                                             # be ID of Jenkins credentials
                                                             # https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin
@@ -90,6 +90,18 @@ jobs:
  - name: CiinaboxGithub-PullRequest
    folder: dsl-doc
    repo: base2Services/ciinabox                             # GitHub repo, with owner
+
+ - name: Ciinabox-MultipleGithub
+   folder: dsl-doc
+   github:                                                 # Multiple GitHub repos defined as list
+    -
+     repo: base2Services/ciinabox-jenkins                  # GitHub repo, with owner
+     branch: master                                        # Branch to build
+     repo_target_dir: jenkins                              # Sub-folder to checkout
+    -
+     repo: base2Services/ciinabox-pipelines
+     branch: master
+     repo_target_dir: pipelines
 
  - name: BitbucketJob
    folder: dsl-doc

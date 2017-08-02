@@ -94,12 +94,14 @@ class JobHelper {
   }
 
   static void scm(def job, def vars) {
-    if(vars.containsKey('git')) {
+    if (vars.containsKey('github') && vars.get('github') instanceof List) {
+      multipleGitSCM(job, vars.get('github'), vars)
+    } else if (vars.containsKey('git')) {
       gitSCM(job, vars.get('git'), vars)
-    } else if(vars.containsKey('branch')) {
-      githubScm(job, vars.get('github',[:]), vars)
-    } else if(vars.containsKey('repo')){
-      pullRequestScm(job, vars.get('github',[:]), vars.get('repo'), vars)
+    } else if (vars.containsKey('branch')) {
+      githubScm(job, vars.get('github', [ : ]), vars)
+    } else if (vars.containsKey('repo')) {
+      pullRequestScm(job, vars.get('github', [ : ]), vars.get('repo'), vars)
     }
   }
 
@@ -291,6 +293,36 @@ class JobHelper {
             permitAll true
             autoCloseFailedPullRequests false
             allowMembersOfWhitelistedOrgsAsAdmin true
+        }
+      }
+    }
+  }
+
+  static void multipleGitSCM(def jobObject, def scmList, def jobConfiguration) {
+    jobObject.multiscm {
+      for (int i = 0; i < scmList.size(); i++) {
+        def config = scmList[i]
+        def block = mergeWithDefaults(config, jobConfiguration, 'github')
+
+        git {
+          remote {
+            credentials(block.get('credentials'))
+            github(config.repo, block.get('protocol'), block.get('host'))
+          }
+          branch(config.branch)
+          extensions {
+            wipeOutWorkspace()
+            if (block.containsKey('repo_target_dir')) {
+              relativeTargetDirectory(block.get('repo_target_dir'))
+            }
+          }
+        }
+      }
+    }
+    scmList.each { scm ->
+      if (scm.containsKey('push') && scm.push) {
+        jobObject.triggers {
+          githubPush()
         }
       }
     }

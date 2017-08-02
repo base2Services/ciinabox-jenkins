@@ -391,15 +391,15 @@ jobs:
 
 ### Github Repository
 
-Ciinabox Jenkins utility makes it easy to work with Github:
+Ciinabox Jenkins utility makes it easy to work with Github, and assumes github as default code repository
 
-```
+```yaml
 jenkins_url: http://localhost:8080/
 
 # Defaults section applies to all jobs being provisioned in single run
 defaults:
   github:
-    protocol: ssh                                           # SSH or HTTP
+    protocol: ssh                                           # ssh or https
     credentials: my-gh-creds                                # Not required for public repos, this should
                                                             # be ID of Jenkins credentials
                                                             # https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin
@@ -414,6 +414,33 @@ jobs:
 
 Depending on type of protocol being used, you may want to specify
 either a private key or username/password key when creating credentials (`my-gh-creds`) in example above
+Also, if checkout and subdirectory of workspaces is required, you can achieve this using `repo_target_dir`
+element (as in example below for multiple github repositories)
+
+
+### Multiple GitHub repositories (MultiSCM plugin)
+
+```yaml
+jenkins_url: http://localhost:8080
+# Defaults section applies to all jobs being provisioned in single run
+defaults:
+  github:
+    protocol: http                                          # ssh or https
+                                                            # be ID of Jenkins credentials
+                                                            # https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin
+ - name: Ciinabox-MultipleGithub
+   folder: dsl-doc
+   github:                                                 # Multiple GitHub repos defined as list
+    -
+     repo: base2Services/ciinabox-jenkins                  # GitHub repo, with owner
+     branch: master                                        # Branch to build
+     repo_target_dir: jenkins                              # Sub-folder to checkout
+    -
+     repo: base2Services/ciinabox-pipelines
+     branch: master
+     repo_target_dir: pipelines
+```
+
 
 ### Github Pull Request Builder
 
@@ -428,7 +455,7 @@ jenkins_url: http://localhost:8080/
 # Defaults section applies to all jobs being provisioned in single run
 defaults:
   github:
-    protocol: ssh                                           # SSH or HTTP
+    protocol: ssh                                           # ssh or https
     credentials: my-gh-creds                                # Not required for public repos, this should
                                                             # be ID of Jenkins credentials
                                                             # https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin
