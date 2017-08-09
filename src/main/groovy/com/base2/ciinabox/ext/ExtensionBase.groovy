@@ -32,7 +32,9 @@ public abstract class ExtensionBase implements ICiinaboxExtension {
 
       // allow simple forms for job attributes key: value
       if (extensionConfiguration.getClass().isPrimitive() || extensionConfiguration instanceof String) {
-        extensionConfiguration = [ "${getDefaultConfigurationAttribute()}": extensionConfiguration ]
+        def newExtensionConfiguration = [:]
+        newExtensionConfiguration.put(getDefaultConfigurationAttribute(),extensionConfiguration)
+        extensionConfiguration = newExtensionConfiguration
       }
 
       //extend all elements if list
