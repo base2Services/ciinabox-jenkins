@@ -8,4 +8,4 @@ out/
 ciinaboxes
 /test-local.sh
 gradle-app.setting
-
+jenkins-data
