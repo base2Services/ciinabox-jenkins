@@ -613,3 +613,22 @@ Also, file is relative to `defaults/scripts_dir` directory
    pipeline:
      file: pipelines/helloworld.groovy
 ```
+
+### Publishing Junit results
+
+Use `junit` element to set path to published junit xml results
+
+```yaml
+ ## Publishing JUnit results
+
+ - name: TestJavaLib
+   folder: dsl-doc
+   repo: workshopforci/DemoJUnit
+   branch: master
+   shell:
+      # Execute maven tests in docker maven container
+    - script: "docker run --rm -w /src -v $PWD:/src -v $HOME/.m2:/root/.m2 maven:3.5.0-alpine mvn test"
+   junit: "target/surefire-reports/**/*.xml"
+
+   
+```

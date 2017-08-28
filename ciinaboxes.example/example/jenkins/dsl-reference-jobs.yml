@@ -200,3 +200,14 @@ jobs:
       default: 'default key1 value'
    pipeline:
      file: pipelines/helloworld.groovy
+
+ ## Publishing JUnit results
+
+ - name: TestJavaLib
+   folder: dsl-doc
+   repo: jdufner/junit
+   branch: master
+   shell:
+      # Execute maven tests in docker maven container
+    - script: "docker run --rm -w /src -v $PWD:/src -v $HOME/.m2:/root/.m2 maven:3.5.0-alpine mvn test"
+   junit: "target/surefire-reports/**/*.xml"
