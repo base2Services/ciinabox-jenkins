@@ -1,20 +1,23 @@
-jenkins:
-  image: base2/ciinabox-jenkins:2
-  environment:
-    - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
-  ports:
-    - "8080:8080"
-  links:
-    - jenkins-docker-slave:slave
+version: "3"
+services:
+  jenkins:
+    container_name: ciinabox-jenkins
+    image: base2/ciinabox-jenkins:2
+    environment:
+      - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
+    ports:
+      - "8080:8080"
+    links:
+      - jenkins-slave:jenkins-docker-dind-slave
+    volumes:
+      - ./jenkins-data:/var/jenkins_home
 
-jenkins-docker-slave:
-  image: base2/ciinabox-dind-slave
-  privileged: true
-  environment:
-    - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
-    - PORT=4444
-  ports:
-    - "2223:22"
-    - "4444:4444"
-  volumes:
-    - $HOME/.aws/:/home/jenkins/.aws
+  jenkins-slave:
+    container_name: ciinabox-jenkins-slave
+    image: base2/ciinabox-docker-slave:latest
+    privileged: true
+    environment:
+      - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
+      - RUN_DOCKER_IN_DOCKER=1
+    volumes:
+      - $HOME/.aws/:/home/jenkins/.aws
