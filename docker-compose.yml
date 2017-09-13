@@ -2,22 +2,34 @@ version: "3"
 services:
   jenkins:
     container_name: ciinabox-jenkins
-    image: base2/ciinabox-jenkins:2
+    image: base2/ciinabox-jenkins:2.60.2
     environment:
       - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
     ports:
       - "8080:8080"
     links:
-      - jenkins-slave:jenkins-docker-dind-slave
+      - jenkins-slave-dind:jenkins-docker-dind-slave
+      - jenkins-slave-dood:jenkins-docker-dood-slave
     volumes:
       - ./jenkins-data:/var/jenkins_home
 
-  jenkins-slave:
-    container_name: ciinabox-jenkins-slave
-    image: base2/ciinabox-docker-slave:latest
+  jenkins-slave-dind:
+    container_name: ciinabox-jenkins-slave-dind
+    image: base2/ciinabox-docker-slave:17.06.1-ce
     privileged: true
     environment:
       - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
       - RUN_DOCKER_IN_DOCKER=1
     volumes:
       - $HOME/.aws/:/home/jenkins/.aws
+
+  jenkins-slave-dood:
+    container_name: ciinabox-jenkins-slave-dood
+    image: base2/ciinabox-docker-slave:17.06.1-ce
+    privileged: false
+    environment:
+      - JAVA_OPTS=-Duser.timezone=Australia/Melbourne
+      - RUN_DOCKER_IN_DOCKER=0
+    volumes:
+      - $HOME/.aws/:/data/jenkins-dood/.aws
+      - /var/run/docker.sock:/var/run/docker.sock
