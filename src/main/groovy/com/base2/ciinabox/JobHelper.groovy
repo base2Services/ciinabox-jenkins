@@ -1,9 +1,7 @@
 package com.base2.ciinabox
 
 import com.base2.ciinabox.ext.ExtensionBase
-import com.base2.ciinabox.ext.ICiinaboxExtension
 import com.base2.util.ReflectionUtils
-import com.sun.org.apache.xpath.internal.operations.Bool
 
 class JobHelper {
 
@@ -101,7 +99,7 @@ class JobHelper {
     } else if (vars.containsKey('branch')) {
       githubScm(job, vars.get('github', [ : ]), vars)
     } else if (vars.containsKey('repo')) {
-      pullRequestScm(job, vars.get('github', [ : ]), vars.get('repo'), vars)
+      pullRequestGithub(job, vars.get('github', [ : ]), vars.get('repo'), vars)
     }
   }
 
@@ -254,7 +252,7 @@ class JobHelper {
     }
   }
 
-  static void pullRequestScm(def job, def scm, def repo, def vars) {
+  static void pullRequestGithub(def job, def scm, def repo, def vars) {
     def gh = mergeWithDefaults(scm, vars, 'github')
     job.scm {
       git {
@@ -265,6 +263,7 @@ class JobHelper {
         }
         branch('${sha1}')
         extensions {
+          wipeOutWorkspace()
           if(gh.containsKey('repo_target_dir')) {
             relativeTargetDirectory(gh.get('repo_target_dir'))
           }
