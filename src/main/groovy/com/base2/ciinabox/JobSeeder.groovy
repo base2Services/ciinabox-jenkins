@@ -67,7 +67,9 @@ allYamlFileNames.each {String jobsFile ->
     //if specific job is defined
     if (jobs['jobs'] && StringUtils.isNotEmpty(jobToProcess)) {
       jobs['jobs'] = jobs['jobs'].findAll {
-        (it['name'] == null) || (it['name'].equalsIgnoreCase(jobToProcess))
+        (it['name'] == null) || (it['name'].equalsIgnoreCase(jobToProcess)) ||
+                (it['name'].matches(jobToProcess)) ||
+                (it['name'].matches(jobToProcess.replace('*','.*')))
       }
       if(jobs['jobs'].size() == 0){
         return
@@ -81,7 +83,7 @@ allYamlFileNames.each {String jobsFile ->
 }
 if (!processedJobs) {
   j = jobFileToProcess ?: 'jobs.yml'
-  println "no ${j} file found for ${ciinabox} found in ${ciinaboxesDir.absolutePath}/jenkins"
+  println "no ${j} file found for ${ciinabox} found in ${ciinaboxesDir.absolutePath}/${ciinabox}/jenkins"
 }
 
 def checkPluginVersions(config){

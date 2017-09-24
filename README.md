@@ -90,7 +90,8 @@ open http://192.168.99.100:8080/ in a browser and confirm the example job have b
 
 By default all jobs are published. 
 
-If you want to specify single job, use `-Djob=$jobname`
+If you want to specify single job, or multiple jobs matching pattern, use `-Djob=$jobname`
+E.g. `-Djob=Deploy-*` will provision all with name starting with `Deploy-`
 
 If you want to specify single job file, use `-Djobfile=$jobfile[.yml]`
 
