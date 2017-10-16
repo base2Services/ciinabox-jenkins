@@ -597,7 +597,57 @@ cronTrigger: */5 * * * *   ## Runs every 5 minutes
 ### Build Environment
 
 
-### Build Steps
+### Shell scripts
+
+#### Inline
+
+
+```yaml
+...
+  shell:
+    - script: 'mvn clean install'
+...
+```
+
+#### From file
+
+```yaml
+...
+  shell:
+    - file: 'scripts/application/build.sh'
+...
+```
+
+#### From multiple files
+
+
+End user should use `multifile` key. In example below application secrets are being delete by first logging into secret stash store, and then deleting keys themselves.
+
+```yaml
+  - name: Delete-Application-Secrets
+    parameters:
+      account:
+        options:
+          - alpha
+          - dev
+          - prod
+        description: 'Secret stash account'
+
+      environment_name:
+        default: microservices-project
+        description: 'Name of project for which secrets are being altered'
+
+      key_name:
+        default: ''
+        description: 'Name of secret key to remove'
+
+    shell:
+      - multifile:
+         - scripts/common/secrets_storage_login.sh
+         - scripts/secretmgmt/delete.sh
+
+```
+
 
 ### Pipeline jobs
 
