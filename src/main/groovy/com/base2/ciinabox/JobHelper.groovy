@@ -143,6 +143,10 @@ class JobHelper {
             script = job.jobManagement.readFileInWorkspace(scriptDir + "/" + script)
           }
         }
+        if(type == 'multifile' && value instanceof List){
+           script = ''
+           value.each { f-> script+= job.jobManagement.readFileInWorkspace(scriptDir + "/" + f)}
+        }
         job.steps {
           shell script
         }
