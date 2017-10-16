@@ -273,7 +273,7 @@ class JobHelper {
 
     job.configure { Node node ->
       def hooks = gh.get('use_hooks')
-      def orgs = gh.get('org_white_list')
+      def orgs = gh.get('org_white_list').join(' ')
       def pollCron = gh.get('cron')
       if(pollCron == null){
         pollCron = '* * * * *'
