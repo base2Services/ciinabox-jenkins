@@ -429,7 +429,8 @@ defaults:
     protocol: http                                          # ssh or https
                                                             # be ID of Jenkins credentials
                                                             # https://wiki.jenkins-ci.org/display/JENKINS/Credentials+Plugin
- - name: Ciinabox-MultipleGithub
+jobs:
+  - name: Ciinabox-MultipleGithub
    folder: dsl-doc
    github:                                                 # Multiple GitHub repos defined as list
     -
