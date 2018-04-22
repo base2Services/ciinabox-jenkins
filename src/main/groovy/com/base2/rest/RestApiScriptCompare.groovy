@@ -11,6 +11,7 @@ import javaposse.jobdsl.dsl.*
 class RestApiScriptCompare extends MockJobManagement {
 
   final RESTClient restClient
+  final String jenkinsUrl
 
   RestApiScriptCompare(String baseUrl) {
     if (!baseUrl != null && !baseUrl.endsWith("/")) {
@@ -20,6 +21,7 @@ class RestApiScriptCompare extends MockJobManagement {
     restClient = new RESTClient(baseUrl)
     restClient.ignoreSSLIssues()
     restClient.handler.failure = { it }
+    jenkinsUrl = baseUrl
   }
 
   void setCredentials(String username, String password) {
@@ -104,7 +106,7 @@ class RestApiScriptCompare extends MockJobManagement {
                 remoteLine = it.revised.position + 1,
                 sourceText = String.join("\n",it.original.lines),
                 remoteText = String.join("\n",it.revised.lines)
-            
+
             println "Local  ${String.format("L#%4s", sourceLine)}:|\n $sourceText"
             println "Remote ${String.format("L#%4s", remoteLine)}:|\n $remoteText"
             println "------"
@@ -139,6 +141,10 @@ class RestApiScriptCompare extends MockJobManagement {
             path: getPath(name, isView) + '/config.xml',
             headers: [ Accept: 'application/xml' ],
     )
+    if(!(resp?.data?.text) || resp.statusLine.statusCode != 200){
+      def fullUrl = "${jenkinsUrl}${getPath(name, isView)}/config.xml"
+      println "GET ${fullUrl}\nStatus: ${resp.statusLine}\nBody:${resp?.data}\n"
+    }
     resp?.data?.text
   }
 
