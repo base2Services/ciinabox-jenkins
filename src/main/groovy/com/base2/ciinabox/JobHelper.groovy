@@ -19,7 +19,7 @@ class JobHelper {
     steps(job,vars)
     triggerJobs(job,vars.get('trigger',[:]),vars)
     publishers(job, vars)
-    postTriggerJobs(job,vars.get('post_trigger',[]),vars)
+    postTriggerActions(job,vars.get('post_trigger',[]),vars)
     archive(job, vars.get('archive', []))
     gitPush(job, vars.get('push',[]))
 
@@ -447,12 +447,12 @@ class JobHelper {
     }
   }
 
-  static postTriggerJobs(def job, def triggers, def vars) {
+  static postTriggerActions(def job, def triggers, def vars) {
     job.publishers {
-      triggers.each { trigger ->
-        if (trigger.get('groovy')) {
+      triggers.each { action ->
+        if (action.get('groovy')) {
           def scriptDir = lookupDefault(vars,'scripts_dir','ciinaboxes')
-          def steps = trigger.get('groovy')
+          def steps = action.get('groovy')
           steps.each { step ->
             step.each { type, value ->
               if(type == 'file') {
@@ -469,13 +469,13 @@ class JobHelper {
           }
         } else {
           downstreamParameterized {
-            trigger(trigger.get('job')) {
+            trigger(action.get('job')) {
               parameters {
-                if(trigger.get('current_parameters',false)) {
+                if(action.get('current_parameters',false)) {
                   currentBuild()
                 }
-                if(trigger.containsKey('parameters')) {
-                  predefinedProps(toUpperCaseKeys(trigger.get('parameters',[:])))
+                if(action.containsKey('parameters')) {
+                  predefinedProps(toUpperCaseKeys(action.get('parameters',[:])))
                 }
               }
             }
