@@ -2,6 +2,7 @@ package com.base2.ciinabox
 
 import com.base2.ciinabox.ext.ExtensionBase
 import com.base2.util.ReflectionUtils
+import javaposse.jobdsl.dsl.helpers.publisher.PublisherContext.Behavior
 
 class JobHelper {
 
@@ -448,15 +449,34 @@ class JobHelper {
 
   static postTriggerJobs(def job, def triggers, def vars) {
     job.publishers {
-      triggers.each { triggerJob ->
-        downstreamParameterized {
-          trigger(triggerJob.get('job')) {
-            parameters {
-              if(triggerJob.get('current_parameters',false)) {
-                currentBuild()
+      triggers.each { trigger ->
+        if (trigger.get('groovy')) {
+          def scriptDir = lookupDefault(vars,'scripts_dir','ciinaboxes')
+          def steps = trigger.get('groovy')
+          steps.each { step ->
+            step.each { type, value ->
+              if(type == 'file') {
+                File file = new File(scriptDir + '/' + value)
+                if(file.exists()) {
+                  groovyPostBuild(file.text, Behavior.DoNothing)
+                } else {
+                  throw new RuntimeException("Groovy script '${value}' does not exist in the 'ciinaboxes' directory.")
+                }
+              } else if(type == 'inline') {
+                groovyPostBuild(value, Behavior.DoNothing)
               }
-              if(triggerJob.containsKey('parameters')) {
-                predefinedProps(toUpperCaseKeys(triggerJob.get('parameters',[:])))
+            }
+          }
+        } else {
+          downstreamParameterized {
+            trigger(trigger.get('job')) {
+              parameters {
+                if(trigger.get('current_parameters',false)) {
+                  currentBuild()
+                }
+                if(trigger.containsKey('parameters')) {
+                  predefinedProps(toUpperCaseKeys(trigger.get('parameters',[:])))
+                }
               }
             }
           }
