@@ -649,6 +649,23 @@ End user should use `multifile` key. In example below application secrets are be
 
 ```
 
+### Postbuild Actions
+
+A postbuild action can be specified using the key `post_trigger`. There are currently two types of actions that are supported:
+- `job`, which runs another job
+- `groovy`, which can execute Groovy from either a file or inline code
+```yaml
+ - name: PostbuildExample
+   folder: dsl-doc
+   parameters:
+     key1: value1
+   post_trigger:
+      - job: folder/MyJob
+        current_parameters: true
+      - groovy:
+        - file: user/scripts/test.groovy  # Or below
+        - script: "println hello"
+```
 
 ### Pipeline jobs
 
