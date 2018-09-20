@@ -462,7 +462,7 @@ class JobHelper {
                 } else {
                   throw new RuntimeException("Groovy script '${value}' does not exist in the 'ciinaboxes' directory.")
                 }
-              } else if(type == 'inline') {
+              } else if(type == 'script') {
                 groovyPostBuild(value, Behavior.DoNothing)
               }
             }
