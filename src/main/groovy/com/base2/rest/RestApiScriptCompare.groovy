@@ -53,6 +53,7 @@ class RestApiScriptCompare extends MockJobManagement {
     String status
 
     String existingXml = fetchExistingXml(name, isView)
+
     if (existingXml) {
 
       def remoteObj = new XmlSlurper().parseText(existingXml),
@@ -141,11 +142,12 @@ class RestApiScriptCompare extends MockJobManagement {
             path: getPath(name, isView) + '/config.xml',
             headers: [ Accept: 'application/xml' ],
     )
-    if(!(resp?.data?.text) || resp.statusLine.statusCode != 200){
+    String text = resp?.data?.text
+    if(!(text) || resp.statusLine.statusCode != 200){
       def fullUrl = "${jenkinsUrl}${getPath(name, isView)}/config.xml"
       println "GET ${fullUrl}\nStatus: ${resp.statusLine}\nBody:${resp?.data}\n"
     }
-    resp?.data?.text
+    return text
   }
 
   static String getPath(String name, boolean isView) {
