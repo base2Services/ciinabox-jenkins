@@ -2,6 +2,7 @@ package com.base2.ciinabox
 
 import com.base2.ciinabox.ext.ExtensionBase
 import com.base2.util.ReflectionUtils
+import javaposse.jobdsl.dsl.helpers.publisher.PublisherContext.Behavior
 
 class JobHelper {
 
@@ -18,7 +19,7 @@ class JobHelper {
     steps(job,vars)
     triggerJobs(job,vars.get('trigger',[:]),vars)
     publishers(job, vars)
-    postTriggerJobs(job,vars.get('post_trigger',[]),vars)
+    postTriggerActions(job,vars.get('post_trigger',[]),vars)
     archive(job, vars.get('archive', []))
     gitPush(job, vars.get('push',[]))
 
@@ -446,17 +447,36 @@ class JobHelper {
     }
   }
 
-  static postTriggerJobs(def job, def triggers, def vars) {
+  static postTriggerActions(def job, def triggers, def vars) {
     job.publishers {
-      triggers.each { triggerJob ->
-        downstreamParameterized {
-          trigger(triggerJob.get('job')) {
-            parameters {
-              if(triggerJob.get('current_parameters',false)) {
-                currentBuild()
+      triggers.each { action ->
+        if (action.get('groovy')) {
+          def scriptDir = lookupDefault(vars,'scripts_dir','ciinaboxes')
+          def steps = action.get('groovy')
+          steps.each { step ->
+            step.each { type, value ->
+              if(type == 'file') {
+                File file = new File(scriptDir + '/' + value)
+                if(file.exists()) {
+                  groovyPostBuild(file.text, Behavior.DoNothing)
+                } else {
+                  throw new RuntimeException("Groovy script '${value}' does not exist in the 'ciinaboxes' directory.")
+                }
+              } else if(type == 'script') {
+                groovyPostBuild(value, Behavior.DoNothing)
               }
-              if(triggerJob.containsKey('parameters')) {
-                predefinedProps(toUpperCaseKeys(triggerJob.get('parameters',[:])))
+            }
+          }
+        } else {
+          downstreamParameterized {
+            trigger(action.get('job')) {
+              parameters {
+                if(action.get('current_parameters',false)) {
+                  currentBuild()
+                }
+                if(action.containsKey('parameters')) {
+                  predefinedProps(toUpperCaseKeys(action.get('parameters',[:])))
+                }
               }
             }
           }
